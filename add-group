@@ -29,7 +29,11 @@ if [ -n "$users" ]; then
     IFS="$SAVED_IFS"
 
     for u in $*; do
-	/usr/sbin/usermod -G $name $u > /dev/null 2>&1
+	old=`egrep "[:,]$u(,|$)" /etc/group | cut -d : -f 1 | xargs echo`
+	if [ -n "$old" ]; then
+	    old=`echo ",$old" | sed 's/ /,/g'`
+	fi
+	/usr/sbin/usermod -G $name$old $u > /dev/null 2>&1
     done
 fi
 
