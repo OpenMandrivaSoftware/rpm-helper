@@ -20,16 +20,18 @@ num=$2				# number of packages installed
 name=$3				# name of the group
 users=$4			# users to add to this group
 
-SAVED_IFS="$IFS"
-export IFS="$IFS",
-set $users
-IFS="$SAVED_IFS"
-
 /usr/sbin/groupadd -r $name > /dev/null 2>&1
 
-for u in $*; do
-    /usr/sbin/usermod -G $name $u > /dev/null 2>&1
-done
+if [ -n "$users" ]; then
+    SAVED_IFS="$IFS"
+    export IFS="$IFS",
+    set $users
+    IFS="$SAVED_IFS"
+
+    for u in $*; do
+	/usr/sbin/usermod -G $name $u > /dev/null 2>&1
+    done
+fi
 
 exit 0
 
