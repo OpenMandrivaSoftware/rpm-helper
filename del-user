@@ -1,0 +1,22 @@
+#!/bin/sh
+#---------------------------------------------------------------
+# Project         : Mandrake Linux
+# Module          : rpm-helper
+# File            : del-user
+# Version         : $Id$
+# Author          : Frederic Lepied
+# Created On      : Mon Jul  8 08:26:40 2002
+# Purpose         : helper script for rpm scriptlets to remove a
+#		    system user.
+#---------------------------------------------------------------
+
+if [ $# != 3 ]; then
+    echo "usage: $0 <pkg name> <num installed> <user name>" 1>&2
+    exit 1
+fi
+
+pkg=$1				# name of the package
+num=$2				# number of packages installed
+name=$3				# name of the user
+
+# del-user ends here

@@ -1,0 +1,27 @@
+#!/bin/sh
+#---------------------------------------------------------------
+# Project         : Mandrake Linux
+# Module          : rpm-helper
+# File            : del-service
+# Version         : $Id$
+# Author          : Frederic Lepied
+# Created On      : Tue Jul  9 08:11:26 2002
+# Purpose         : helper script for rpm scriptlets to remove a
+#		    service.
+#---------------------------------------------------------------
+
+if [ $# != 3 ]; then
+    echo "usage: $0 <pkg name> <number installed> <service name>" 1>&2
+    exit 1
+fi
+
+pkg=$1				# name of the package
+num=$2				# number of packages installed
+srv=$3				# name of the service
+
+if [ $num = 0 ]; then
+    /sbin/service $srv stop > /dev/null 2>/dev/null || :
+    /sbin/chkconfig --del $srv
+fi
+
+# del-service ends here

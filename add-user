@@ -1,0 +1,26 @@
+#!/bin/sh
+#---------------------------------------------------------------
+# Project         : Mandrake Linux
+# Module          : rpm-helper
+# File            : add-user
+# Version         : $Id$
+# Author          : Frederic Lepied
+# Created On      : Mon Jul  8 08:14:34 2002
+# Purpose         : helper script for rpm scriptlets to add a
+#		    system user.
+#---------------------------------------------------------------
+
+if [ $# != 5 ]; then
+    echo "usage: $0 <pkg name> <num installed> <user name> <home dir> <shell>" 1>&2
+    exit 1
+fi
+
+pkg=$1				# name of the package
+num=$2				# number of packages installed
+name=$3				# name of the user
+dir=$4				# home directory
+shell=$5			# shell
+
+/usr/sbin/useradd -r -M -s $shell -d $dir -c "system user for $pkg" $name > /dev/null 2>&1 || :
+
+# add-user ends here
