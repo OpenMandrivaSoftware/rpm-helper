@@ -1,0 +1,36 @@
+#!/bin/sh
+#---------------------------------------------------------------
+# Project         : Mandrake Linux
+# Module          : rpm-helper
+# File            : del-shell
+# Version         : $Id$
+# Author          : Thierry Vignaud
+# Created On      : Tue Nov  5 13:52:20 2002
+# Purpose         : helper script for rpm scriptlets to remove a
+#		    shell from /etc/shells.
+#---------------------------------------------------------------
+
+if [ $# != 3 ]; then
+	echo "usage: $0 <pkg name> <number installed> <shell name>" 1>&2
+	exit 1
+fi
+
+pkg=$1				# name of the package
+num=$2				# number of packages installed
+shl=$3				# name of the shell
+
+CFG_FILE=/etc/shells
+
+# Create $CFG_FILE if needed
+if [ ! -f $CFG_FILE ]; then
+	> $CFG_FILE
+	exit 0
+fi
+
+if [ "$num" = 0 ]; then
+	if [ ! -x $shl ]; then
+		grep -v "^$shl$" < $CFG_FILE > $CFG_FILE.new
+		mv -f $CFG_FILE.new $CFG_FILE
+	fi
+fi 
+
