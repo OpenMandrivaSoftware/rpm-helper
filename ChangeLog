@@ -1,0 +1,10 @@
+2002-07-09 17:04  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* AUTHORS, COPYING, Makefile, README, README.CVS, add-service,
+	add-user, del-service, del-user, rpm-helper.spec: Initial version
+
+2002-07-09 17:04  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* AUTHORS, COPYING, Makefile, README, README.CVS, add-service,
+	add-user, del-service, del-user, rpm-helper.spec: Initial revision
+
