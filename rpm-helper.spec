@@ -10,7 +10,7 @@
 
 Summary: Helper scripts for rpm scriptlets
 Name: rpm-helper
-Version: 0.4.1
+Version: 0.5
 Release: 1mdk
 Source0: %{name}-%{version}.tar.bz2
 License: GPL
@@ -41,6 +41,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/%{name}
 
 %changelog
+* Thu Aug  1 2002 Frederic Lepied <flepied@mandrakesoft.com> 0.5-1mdk
+- add-service: on upgrade, restart services that depend of portmap.
+
 * Wed Jul 31 2002 Frederic Lepied <flepied@mandrakesoft.com> 0.4.1-1mdk
 - correct add-group when no user is added to the group
 
