@@ -1,3 +1,11 @@
+2002-08-01 19:39  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* rpm-helper.spec: 0.5-1mdk
+
+2002-08-01 19:39  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* add-service: restart services that depend of portmap
+
 2002-07-31 10:47  Frederic Lepied <flepied@mandrakesoft.com>
 
 	* rpm-helper.spec: 0.4.1-1mdk
