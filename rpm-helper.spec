@@ -20,6 +20,7 @@ BuildArchitectures: noarch
 BuildRoot: %{_tmppath}/%{name}-buildroot
 Prefix: %{_prefix}
 PreReq: chkconfig
+Conflicts: chkconfig < 1.3.4-10mdk
 
 %description
 Helper scripts for rpm scriptlets to help create/remove services/users.
