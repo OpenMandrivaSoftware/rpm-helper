@@ -7,7 +7,7 @@
 # Author          : Thierry Vignaud
 # Created On      : Tue Nov  5 13:52:20 2002
 # Purpose         : helper script for rpm scriptlets to add a
-#		    shell from $CFG_FILE.
+#		    shell from /etc/shells
 #---------------------------------------------------------------
 
 if [ $# != 3 ]; then
@@ -26,7 +26,5 @@ if [ ! -f $CFG_FILE ]; then
     > $CFG_FILE
 fi
 
-if [ $num = 1 ]; then
-    grep -v "^$shl$" && echo $shl >> $CFG_FILE
-fi
-
+grep -qv "^$shl$" $CFG_FILE && echo $shl >> $CFG_FILE
+exit 0
