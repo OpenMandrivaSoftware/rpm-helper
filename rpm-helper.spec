@@ -10,7 +10,7 @@
 
 Summary: Helper scripts for rpm scriptlets
 Name: rpm-helper
-Version: 0.7.1
+Version: 0.8
 Release: 1mdk
 Source0: %name-%version.tar.bz2
 License: GPL
@@ -46,6 +46,11 @@ rm -rf $RPM_BUILD_ROOT
 %_datadir/%name
 
 %changelog
+* Sun Dec 22 2002 Frederic Lepied <flepied@mandrakesoft.com> 0.8-1mdk
+- corrected add-shell to not add the shell multiple times
+- corrected add-service when SECURE_LEVEL isn't set
+- corrected add-group not to delete supplementary groups already added
+
 * Tue Nov  5 2002 Thierry Vignaud <tvignaud@mandrakesoft.com> 0.7.1-1mdk
 - add verify-shell
 
