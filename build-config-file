@@ -1,0 +1,77 @@
+#!/bin/sh
+#---------------------------------------------------------------
+# Project         : Mandrake Linux
+# Module          : rpm-helper
+# File            : build-config-file
+# Version         : $Id$
+# Author          : Frederic Lepied
+# Created On      : Sat Nov  1 08:21:42 2003
+# Purpose         : concat files to build another one.
+#---------------------------------------------------------------
+
+if [[ $# != 1 ]]; then
+    echo "usage: `basename $0` <config file>" 1>&2
+    exit 1
+fi
+
+FILE=$1
+BASE=`basename $FILE`
+CONFIG=/etc/config-file/$BASE
+
+# variables that can be overriden in the config file
+
+COMMENT='#'			# comment leader
+DIRS="${FILE}.d"		# direcories to look for parts
+EXT='.conf'			# default extension of parts
+POST=				# executable to run after the merge
+PRE=				# executable to run before the merge
+CONCAT=1			# if set to 1, concat the parts
+USER=root			# user owning the file
+GROUP=root			# group owning the file
+MODE=0644			# permissions of the file
+
+# code
+
+# source the config file to override the default settings
+
+if [[ -r $CONFIG ]]; then
+    . $CONFIG
+fi
+
+# run pre command
+
+if [[ -x "$PRE" ]]; then
+    $PRE $FILE
+fi
+
+# read the parts
+
+if [[ $CONCAT = 1 ]]; then
+    rm -f $FILE
+    for d in $DIRS; do
+	for f in `ls ${d}/*${EXT} 2> /dev/null`; do
+	    if [[ -x $f ]]; then
+		[[ -n "$COMMENT" ]] && echo "$COMMENT output from $f" >> $FILE
+		$f >> $FILE
+	    elif [[ -r $f ]]; then
+		[[ -n "$COMMENT" ]] && echo "$COMMENT $f" >> $FILE
+		cat $f >> $FILE
+	    fi
+	done
+    done
+fi
+
+# set the owner, group and perms
+
+if [[ -f $FILE ]]; then
+    chown $USER.$GROUP $FILE
+    chmod $MODE $FILE
+fi
+
+# run post command
+
+if [[ -x "$POST" ]]; then
+    $POST $FILE
+fi
+
+# build-config-file ends here
