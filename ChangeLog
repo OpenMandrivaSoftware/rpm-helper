@@ -1,3 +1,16 @@
+2004-09-23 03:03  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* rpm-helper.spec: 0.10-1mdk
+
+2004-09-23 03:02  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* add-service: add the service again on upgrade if the service is
+	  activated
+
+2003-11-01 08:43  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* build-config-file: first version. Needs testing.
+
 2003-09-17 15:52  Frederic Lepied <flepied@mandrakesoft.com>
 
 	* rpm-helper.spec: 0.9.1-1mdk
@@ -29,12 +42,12 @@
 2002-11-07 15:01  Thierry Vignaud <tvignaud@mandrakesoft.com>
 
 	* add-shell: keep /etc/shells sorted, thus enabling to ensure uniq
-	entries
+	  entries
 
 2002-11-05 15:20  Thierry Vignaud <tvignaud@mandrakesoft.com>
 
 	* Makefile, add-shell, del-shell, rpm-helper.spec, verify-shell:
-	add verify-shell
+	  add verify-shell
 
 2002-11-05 14:36  Thierry Vignaud <tvignaud@mandrakesoft.com>
 
@@ -43,8 +56,8 @@
 2002-11-05 14:36  Thierry Vignaud <tvignaud@mandrakesoft.com>
 
 	* Makefile: - add {add,del}-shell
-	
-	- add localsrpm target
+
+	  - add localsrpm target
 
 2002-11-05 14:35  Thierry Vignaud <tvignaud@mandrakesoft.com>
 
@@ -133,10 +146,11 @@
 2002-07-09 17:04  Frederic Lepied <flepied@mandrakesoft.com>
 
 	* AUTHORS, COPYING, Makefile, README, README.CVS, add-service,
-	add-user, del-service, del-user, rpm-helper.spec: Initial revision
+	  add-user, del-service, del-user, rpm-helper.spec: Initial
+	  revision
 
 2002-07-09 17:04  Frederic Lepied <flepied@mandrakesoft.com>
 
 	* AUTHORS, COPYING, Makefile, README, README.CVS, add-service,
-	add-user, del-service, del-user, rpm-helper.spec: Initial version
+	  add-user, del-service, del-user, rpm-helper.spec: Initial version
 
