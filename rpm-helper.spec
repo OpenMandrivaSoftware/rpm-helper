@@ -10,7 +10,7 @@
 
 Summary: Helper scripts for rpm scriptlets
 Name: rpm-helper
-Version: 0.8
+Version: 0.9
 Release: 1mdk
 Source0: %name-%version.tar.bz2
 License: GPL
@@ -18,8 +18,8 @@ Group: System/Configuration/Packaging
 URL: http://www.mandrakelinux.com/
 BuildArchitectures: noarch
 BuildRoot: %_tmppath/%name-buildroot
-PreReq: chkconfig
 Conflicts: chkconfig < 1.3.4-10mdk
+Requires: chkconfig, grep, shadow-utils, chkconfig, initscripts, coreutils
 
 %description
 Helper scripts for rpm scriptlets to help create/remove :
@@ -46,6 +46,9 @@ rm -rf $RPM_BUILD_ROOT
 %_datadir/%name
 
 %changelog
+* Tue Jan 14 2003 Frederic Lepied <flepied@mandrakesoft.com> 0.9-1mdk
+- added the right requires
+
 * Sun Dec 22 2002 Frederic Lepied <flepied@mandrakesoft.com> 0.8-1mdk
 - corrected add-shell to not add the shell multiple times
 - corrected add-service when SECURE_LEVEL isn't set
