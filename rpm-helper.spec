@@ -10,20 +10,23 @@
 
 Summary: Helper scripts for rpm scriptlets
 Name: rpm-helper
-Version: 0.6
+Version: 0.7
 Release: 1mdk
-Source0: %{name}-%{version}.tar.bz2
+Source0: %name-%version.tar.bz2
 License: GPL
 Group: System/Configuration/Packaging
 URL: http://www.mandrakelinux.com/
 BuildArchitectures: noarch
-BuildRoot: %{_tmppath}/%{name}-buildroot
-Prefix: %{_prefix}
+BuildRoot: %_tmppath/%name-buildroot
 PreReq: chkconfig
 Conflicts: chkconfig < 1.3.4-10mdk
 
 %description
-Helper scripts for rpm scriptlets to help create/remove services/users.
+Helper scripts for rpm scriptlets to help create/remove :
+- groups
+- services
+- shells
+- users
 
 %prep
 %setup
@@ -32,7 +35,7 @@ Helper scripts for rpm scriptlets to help create/remove services/users.
 
 %install
 rm -rf $RPM_BUILD_ROOT
-%makeinstall_std LIBDIR=%{_datadir}/%{name}
+%makeinstall_std LIBDIR=%_datadir/%name
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -40,10 +43,14 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root)
 %doc README* ChangeLog AUTHORS
-%{_datadir}/%{name}
+%_datadir/%name
 
 %changelog
+* Tue Nov  5 2002 Thierry Vignaud <tvignaud@mandrakesoft.com> 0.7-1mdk
+- add add-shell and del-shell to update /etc/shells
+
 * Fri Sep  6 2002 Frederic Lepied <flepied@mandrakesoft.com> 0.6-1mdk
+- add add-shell and del-shell to update /etc/shells
 - add-service: do the security stuff here instead of doing it in chkconfig
 to be more flexible.
 
