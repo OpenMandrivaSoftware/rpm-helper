@@ -1,3 +1,7 @@
+2003-09-17 15:52  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* rpm-helper.spec: 0.9.1-1mdk
+
 2003-01-14 21:59  Frederic Lepied <flepied@mandrakesoft.com>
 
 	* rpm-helper.spec: 0.9-1mdk
@@ -129,10 +133,10 @@
 2002-07-09 17:04  Frederic Lepied <flepied@mandrakesoft.com>
 
 	* AUTHORS, COPYING, Makefile, README, README.CVS, add-service,
-	add-user, del-service, del-user, rpm-helper.spec: Initial version
+	add-user, del-service, del-user, rpm-helper.spec: Initial revision
 
 2002-07-09 17:04  Frederic Lepied <flepied@mandrakesoft.com>
 
 	* AUTHORS, COPYING, Makefile, README, README.CVS, add-service,
-	add-user, del-service, del-user, rpm-helper.spec: Initial revision
+	add-user, del-service, del-user, rpm-helper.spec: Initial version
 
