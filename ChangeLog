@@ -1,3 +1,15 @@
+2002-07-10 15:12  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* rpm-helper.spec: 0.2-1mdk
+
+2002-07-10 15:10  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* Makefile: added create-file
+
+2002-07-10 15:08  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* create-file: first version
+
 2002-07-09 17:04  Frederic Lepied <flepied@mandrakesoft.com>
 
 	* AUTHORS, COPYING, Makefile, README, README.CVS, add-service,
