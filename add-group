@@ -28,7 +28,7 @@ IFS="$SAVED_IFS"
 /usr/sbin/groupadd -r $name > /dev/null 2>&1
 
 for u in $*; do
-    /usr/sbin/usermod -G $1 $u > /dev/null 2>&1
+    /usr/sbin/usermod -G $name $u > /dev/null 2>&1
 done
 
 exit 0
