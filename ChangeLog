@@ -1,3 +1,15 @@
+2002-07-12 17:22  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* rpm-helper.spec: 0.3-1mdk
+
+2002-07-12 17:20  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* add-user: added missing groupadd call
+
+2002-07-12 17:19  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* add-user: added support for extended groups
+
 2002-07-10 15:12  Frederic Lepied <flepied@mandrakesoft.com>
 
 	* rpm-helper.spec: 0.2-1mdk
