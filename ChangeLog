@@ -1,3 +1,11 @@
+2002-07-31 10:47  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* rpm-helper.spec: 0.4.1-1mdk
+
+2002-07-31 10:47  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* add-group: corrected group add without a user to add
+
 2002-07-29 17:25  Frederic Lepied <flepied@mandrakesoft.com>
 
 	* rpm-helper.spec: 0.4-1mdk
