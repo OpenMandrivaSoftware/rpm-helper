@@ -1,3 +1,27 @@
+2002-07-29 17:25  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* rpm-helper.spec: 0.4-1mdk
+
+2002-07-29 17:25  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* add-user: removed group management
+
+2002-07-29 17:24  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* del-group: added comment
+
+2002-07-29 17:22  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* add-group: corrected group argument passing
+
+2002-07-29 17:16  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* Makefile: add-group del-group
+
+2002-07-29 16:15  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* del-group, add-group: first version
+
 2002-07-12 17:22  Frederic Lepied <flepied@mandrakesoft.com>
 
 	* rpm-helper.spec: 0.3-1mdk
