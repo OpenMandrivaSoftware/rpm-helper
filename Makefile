@@ -14,7 +14,7 @@ TAG := $(shell echo "V$(VERSION)_$(RELEASE)" | tr -- '-.' '__')
 
 FILES = AUTHORS README README.CVS COPYING ChangeLog Makefile \
        $(PACKAGE).spec $(SCRIPTS)
-SCRIPTS = add-user del-user add-service del-service
+SCRIPTS = add-user del-user add-service del-service create-file
 
 LIBDIR=/usr/share/rpm-helper
 
