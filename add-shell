@@ -26,8 +26,9 @@ if [ ! -f $CFG_FILE ]; then
     > $CFG_FILE
 fi
 
-grep -qv "^$shl$" $CFG_FILE && \
-  (cat /etc/shells;echo /bin/TSH) | sort | uniq > $CFG_FILE.new
-[[ -f $CFG_FILE.new ]] && mv -f $CFG_FILE.new $CFG_FILE
+if ! grep -q "^$shl$" $CFG_FILE; then
+    (cat $CFG_FILE; echo "$shl") | sort | uniq > $CFG_FILE.new
+    mv -f $CFG_FILE.new $CFG_FILE
+fi
 
 exit 0
