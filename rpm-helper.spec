@@ -10,7 +10,7 @@
 
 Summary: Helper scripts for rpm scriptlets
 Name: rpm-helper
-Version: 0.5
+Version: 0.6
 Release: 1mdk
 Source0: %{name}-%{version}.tar.bz2
 License: GPL
@@ -19,6 +19,7 @@ URL: http://www.mandrakelinux.com/
 BuildArchitectures: noarch
 BuildRoot: %{_tmppath}/%{name}-buildroot
 Prefix: %{_prefix}
+PreReq: chkconfig
 
 %description
 Helper scripts for rpm scriptlets to help create/remove services/users.
@@ -41,6 +42,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/%{name}
 
 %changelog
+* Fri Sep  6 2002 Frederic Lepied <flepied@mandrakesoft.com> 0.6-1mdk
+- add-service: do the security stuff here instead of doing it in chkconfig
+to be more flexible.
+
 * Thu Aug  1 2002 Frederic Lepied <flepied@mandrakesoft.com> 0.5-1mdk
 - add-service: on upgrade, restart services that depend of portmap.
 
