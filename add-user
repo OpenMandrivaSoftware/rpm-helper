@@ -11,7 +11,7 @@
 #---------------------------------------------------------------
 
 if [ $# -lt 5 ]; then
-    echo "usage: $0 <pkg name> <num installed> <user name> <home dir> <shell> [<group1> <group2>...]" 1>&2
+    echo "usage: $0 <pkg name> <num installed> <user name> <home dir> <shell>" 1>&2
     exit 1
 fi
 
@@ -20,17 +20,6 @@ num=$2				# number of packages installed
 name=$3				# name of the user
 dir=$4				# home directory
 shell=$5			# shell
-shift 5
-
-if [ $# -gt 0 ]; then
-    garg="-G $1"
-    /usr/sbin/groupadd -r $1 > /dev/null 2>&1
-    shift
-    for g in $*; do
-	garg="$garg,$g"
-	/usr/sbin/groupadd -r $g > /dev/null 2>&1
-    done
-fi
 
 /usr/sbin/useradd -r -M -s $shell -d $dir -c "system user for $pkg" $garg $name > /dev/null 2>&1
 
