@@ -1,0 +1,31 @@
+#!/bin/sh
+#---------------------------------------------------------------
+# Project         : Mandrake Linux
+# Module          : rpm-helper
+# File            : create-file
+# Version         : $Id$
+# Author          : Frederic Lepied
+# Created On      : Wed Jul 10 15:12:29 2002
+# Purpose         : helper script for rpm scriptlets to create
+#		    a non existent file.
+#---------------------------------------------------------------
+
+if [ $# != 6 ]; then
+    echo "usage: $0 <pkg name> <num installed> <file> <owner> <group> <mode>" 1>&2
+    exit 1
+fi
+
+pkg=$1				# name of the package
+num=$2				# number of packages installed
+file=$3				# filename
+owner=$4			# owner of the file
+group=$5			# group of the file
+mode=$6				# mode of the file
+
+if [ ! -f $file ]; then
+  touch $file
+  chown $owner.$group $file
+  chmod $mode $file
+fi
+
+# create-file ends here
