@@ -10,7 +10,7 @@
 
 Summary: Helper scripts for rpm scriptlets
 Name: rpm-helper
-Version: 0.9.1
+Version: 0.10
 Release: 1mdk
 Source0: %name-%version.tar.bz2
 License: GPL
@@ -46,6 +46,9 @@ rm -rf $RPM_BUILD_ROOT
 %_datadir/%name
 
 %changelog
+* Thu Sep 23 2004 Frederic Lepied <flepied@mandrakesoft.com> 0.10-1mdk
+- add-service: add the service again on upgrade if the service is activated
+
 * Wed Sep 17 2003 Frederic Lepied <flepied@mandrakesoft.com> 0.9.1-1mdk
 - don't depend on initscripts anymore
 
