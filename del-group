@@ -1,0 +1,23 @@
+#!/bin/sh
+#---------------------------------------------------------------
+# Project         : Mandrake Linux
+# Module          : rpm-helper
+# File            : del-group
+# Version         : $Id$
+# Author          : Frederic Lepied
+# Created On      : Mon Jul 29 16:17:34 2002
+# Purpose         : 
+#---------------------------------------------------------------
+
+if [ $# -lt 3 ]; then
+    echo "usage: $0 <pkg name> <num installed> <group name>" 1>&2
+    exit 1
+fi
+
+pkg=$1				# name of the package
+num=$2				# number of packages installed
+name=$3				# name of the group
+
+exit 0
+
+# del-group ends here

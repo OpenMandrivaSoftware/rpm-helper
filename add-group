@@ -1,0 +1,36 @@
+#!/bin/sh
+#---------------------------------------------------------------
+# Project         : Mandrake Linux
+# Module          : rpm-helper
+# File            : add-group
+# Version         : $Id$
+# Author          : Frederic Lepied
+# Created On      : Mon Jul 29 15:07:28 2002
+# Purpose         : helper script for rpm scriptlets to add a
+#		    system group.
+#---------------------------------------------------------------
+
+if [ $# -lt 3 ]; then
+    echo "usage: $0 <pkg name> <num installed> <group name> [<user1>,<user2>...]" 1>&2
+    exit 1
+fi
+
+pkg=$1				# name of the package
+num=$2				# number of packages installed
+name=$3				# name of the group
+users=$4			# users to add to this group
+
+SAVED_IFS="$IFS"
+export IFS="$IFS",
+set $users
+IFS="$SAVED_IFS"
+
+/usr/sbin/groupadd -r $name > /dev/null 2>&1
+
+for u in $*; do
+    /usr/sbin/usermod -G $1 $u > /dev/null 2>&1
+done
+
+exit 0
+
+# add-group ends here
