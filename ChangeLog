@@ -1,3 +1,15 @@
+2002-09-06 09:22  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* rpm-helper.spec: add conflicts with chkconfig
+
+2002-09-06 09:14  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* rpm-helper.spec: 0.6-1mdk
+
+2002-09-06 09:12  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* add-service: do the security stuff
+
 2002-08-01 19:39  Frederic Lepied <flepied@mandrakesoft.com>
 
 	* rpm-helper.spec: 0.5-1mdk
