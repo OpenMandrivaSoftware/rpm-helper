@@ -6,7 +6,8 @@
 # Version         : $Id$
 # Author          : Frederic Lepied
 # Created On      : Mon Jul 29 16:17:34 2002
-# Purpose         : 
+# Purpose         : helper script for rpm scriptlets to remove a
+#		    system group.
 #---------------------------------------------------------------
 
 if [ $# -lt 3 ]; then
