@@ -24,7 +24,7 @@ if [ $num = 1 ]; then
     if [ -r /etc/sysconfig/msec ]; then
 	. /etc/sysconfig/msec
     fi
-    if [ -n "$SECURE_LEVEL" -a "$SECURE_LEVEL" -gt 3 ]; then
+    if [[ -n "$SECURE_LEVEL" ]] && [[ "$SECURE_LEVEL" -gt 3 ]]; then
 	# High security: add only authorized services
 	LIST=/etc/security/msec/server
 	# during the install the symlink isn't done so find the right file
