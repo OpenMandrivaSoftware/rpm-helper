@@ -10,8 +10,8 @@
 
 Summary: Helper scripts for rpm scriptlets
 Name: rpm-helper
-Version: 0.10
-Release: 1mdk
+Version: 0.11
+Release: %mkrel 1
 Source0: %name-%version.tar.bz2
 License: GPL
 Group: System/Configuration/Packaging
@@ -44,8 +44,13 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %doc README* ChangeLog AUTHORS
 %_datadir/%name
+%_sys_macros_dir/%name.macros
 
 %changelog
+* Thu Jun 30 2005 Olivier Thauvin <nanardon@mandriva.org> 0.11-1mdk
+- provide itself its macro (rpm 4.4 powah)
+- mkrel
+
 * Thu Sep 23 2004 Frederic Lepied <flepied@mandrakesoft.com> 0.10-1mdk
 - add-service: add the service again on upgrade if the service is activated
 

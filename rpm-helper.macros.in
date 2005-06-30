@@ -1,0 +1,39 @@
+# $Id$
+
+%_create_ghostfile_helper @LIBDIR@/create-file
+%create_ghostfile() %_create_ghostfile_helper %{name} $1 %{1} %{2} %{3} %{4} \
+%{nil}
+
+# initscripts macros
+%_add_service_helper @LIBDIR@/add-service
+%_post_service() %_add_service_helper %{name} $1 %{1} \
+%{nil}
+
+%_del_service_helper @LIBDIR@/del-service
+%_preun_service() %_del_service_helper %{name} $1 %{1} \
+%{nil}
+
+%_add_user_helper @LIBDIR@/add-user
+%_pre_useradd() %_add_user_helper %{name} $1 %{1} %{2} %{3} \
+%{nil}
+
+%_del_user_helper @LIBDIR@/del-user
+%_postun_userdel() %_del_user_helper %{name} $1 %{1} \
+%{nil}
+
+%_add_group_helper @LIBDIR@/add-group
+%_pre_groupadd() %_add_group_helper %{name} $1 %{1} %{?2:%2} \
+%{nil}
+
+%_del_group_helper @LIBDIR@/del-group
+%_postun_groupdel() %_del_group_helper %{name} $1 %{1} \
+%{nil}
+
+%_add_shell_helper @LIBDIR@/add-shell
+%_post_shelladd() %_add_shell_helper %{name} $1 %{1} \
+%{nil}
+
+%_del_shell_helper @LIBDIR@/del-shell
+%_preun_shelldel() %_del_shell_helper %{name} $1 \
+%{nil}
+

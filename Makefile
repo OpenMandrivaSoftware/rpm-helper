@@ -13,11 +13,15 @@ RELEASE := $(shell rpm -q --qf %{RELEASE} --specfile $(PACKAGE).spec)
 TAG := $(shell echo "V$(VERSION)_$(RELEASE)" | tr -- '-.' '__')
 
 FILES = AUTHORS README README.CVS COPYING ChangeLog Makefile \
-       $(PACKAGE).spec $(SCRIPTS)
+       $(PACKAGE).spec $(SCRIPTS) $(MACROFILEIN)
 SCRIPTS = add-user del-user add-service del-service create-file \
 	add-group del-group add-shell del-shell verify-shell
 
-LIBDIR=/usr/share/rpm-helper
+LIBDIR=/usr/share/$(PACKAGE)
+RPMACROSDIR=/etc/rpm/macros.d
+
+MACROFILEIN = $(PACKAGE).macros.in
+MACROFILE = $(MACROFILEIN:.in=)
 
 all:
 	@echo "done"
@@ -28,6 +32,9 @@ clean:
 install:
 	-mkdir -p $(DESTDIR)$(LIBDIR)
 	cp -p $(SCRIPTS) $(DESTDIR)$(LIBDIR)
+	-mkdir -p $(DESTDIR)$(RPMACROSDIR)
+	cat $(MACROFILEIN) | \
+	sed 's,@LIBDIR@,$(LIBDIR),g' > $(DESTDIR)$(RPMACROSDIR)/$(MACROFILE)
 
 version:
 	@echo "$(VERSION)-$(RELEASE)"

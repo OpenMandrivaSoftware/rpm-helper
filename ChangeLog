@@ -1,3 +1,7 @@
+2005-03-09 21:11  Frederic Lepied <flepied@mandrakesoft.com>
+
+	* .cvsignore: first version
+
 2004-09-23 03:03  Frederic Lepied <flepied@mandrakesoft.com>
 
 	* rpm-helper.spec: 0.10-1mdk
