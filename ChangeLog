@@ -1,3 +1,8 @@
+2005-06-30 10:33  Olivier Thauvin <thauvin@aerov.jussieu.fr>
+
+	* Makefile, rpm-helper.macros.in, rpm-helper.spec: - make
+	  rpm-helper provide itself its macros
+
 2005-03-09 21:11  Frederic Lepied <flepied@mandrakesoft.com>
 
 	* .cvsignore: first version
