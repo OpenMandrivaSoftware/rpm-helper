@@ -1,5 +1,5 @@
 #############################################################################
-# Project         : Mandrake Linux
+# Project         : Mandriva Linux
 # Module          : rpm-helper
 # File            : rpm-helper.spec
 # Version         : $Id$
@@ -15,7 +15,7 @@ Release: %mkrel 1
 Source0: %name-%version.tar.bz2
 License: GPL
 Group: System/Configuration/Packaging
-URL: http://www.mandrakelinux.com/
+URL: http://www.mandriva.com/
 BuildArchitectures: noarch
 BuildRoot: %_tmppath/%name-buildroot
 Conflicts: chkconfig < 1.3.4-10mdk
