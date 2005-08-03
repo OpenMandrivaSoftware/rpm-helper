@@ -1,0 +1,303 @@
+#!/bin/sh
+#---------------------------------------------------------------
+# Project         : Mandriva Linux
+# Module          : rpm-helper
+# File            : del-syslog
+# Version         : 1
+# Author          : Herton Ronaldo Krzesinski
+#                   Thanks for Aurélio Marinho Jargas for
+#                   helping me out with sed expressions,
+#                   my first expressions were very slow to
+#                   execute, parsing block oriented config files
+#                   isn't very simple with line oriented tools
+#                   like grep or sed
+# Created On      : Fri Jul 22 20:25:36 2005
+# Modified On     : Wed Aug 03 14:29:14 2005
+# Purpose         : helper script for rpm scriptlets to del a
+#                   entry filter for software from package into
+#                   syslog (supported sysklogd and syslog-ng).
+#---------------------------------------------------------------
+
+if [ $# -lt 6 ]; then
+	echo "usage: $0 <pkg name> <num installed> <source> <facility> <level> <log file>" 1>&2
+	exit 1
+fi
+
+priority_order="debug info notice warn,warning err,error crit alert emerg,panic"
+
+_del_source_sed() {
+
+cat << EOF
+/^[[:space:]]*source/ {
+	:ini
+	/}/! {
+		N
+		b ini
+	}
+	s#[[:space:]]*unix-stream[[:space:]]*([[:space:]]*"\?$2"\?[[:space:]]*)[[:space:]]*\;##g
+	/[[:space:]]*source[[:space:]]*$1[[:space:]]*{[[:space:]]*}[[:space:]]*\;/d
+}
+EOF
+
+}
+
+delete_source() {
+
+local name=$1
+local sourcefile=$2
+_del_source_sed $name $sourcefile | sed -i -f - /etc/syslog-ng.conf
+
+}
+
+_del_destination_sed() {
+
+# argh: \\\ escape sequence because of shell
+hdl=`echo $2 | sed 's#/#\\\/#g'`
+cat << EOF
+/^[[:space:]]*destination[[:space:]]\+$1/ {
+	:ini
+	/}/! {
+		N
+		b ini
+	}
+	/file[[:space:]]*([[:space:]]*"\?$hdl"\?[[:space:]]*)/d
+}
+EOF
+
+}
+
+delete_destination() {
+
+local name=$1
+local file=$2
+_del_destination_sed $name $file | sed -i -f - /etc/syslog-ng.conf
+
+}
+
+_del_filter_sed() {
+
+cat << EOF
+/^[[:space:]]*filter[[:space:]]\+$1/ {
+	:ini
+	/}/! {
+		N
+		b ini
+	}
+	/facility[[:space:]]*([[:space:]]*"\?$2"\?[[:space:]]*)/ {
+		/level[[:space:]]*([[:space:]]*"\?$3"\?[[:space:]]*)/d
+	}
+}
+EOF
+
+}
+
+delete_filter() {
+
+local name=$1
+local facility=$2
+local level=$3
+_del_filter_sed $name $facility $level | sed -i -f - /etc/syslog-ng.conf
+
+}
+
+_del_log_sed() {
+
+cat << EOF
+/^[[:space:]]*log/{
+	:ini
+	/}/! {
+		N
+		b ini
+	}
+	/source[[:space:]]*([[:space:]]*"\?$1"\?[[:space:]]*)/ {
+		/filter[[:space:]]*([[:space:]]*"\?$2"\?[[:space:]]*)/ {
+			/destination[[:space:]]*([[:space:]]*"\?$3"\?[[:space:]]*)/d
+		}
+	}
+}
+EOF
+
+}
+
+delete_log() {
+
+local source=$1
+local filter=$2
+local destination=$3
+_del_log_sed $source $filter $destination | sed -i -f - /etc/syslog-ng.conf
+
+}
+
+pkg=$1                          # name of the package
+num=$2                          # number of packages installed
+source=$3                       # from where the log will come (log stream)
+                                # NOTE: source must be a unix-stream
+facility=$4                     # subclass of log source, like kern, mail...
+level_begin=$5                  # log level, eg.: info, notice, critical,
+level_end=$6                    # if a range was specified before,
+                                # delete it
+logfile=$7                      # log file, like /var/log/messages
+
+# Don't remove entry on package updates
+if [ "$num" -ne 0 ]; then
+	return 0
+fi
+
+# Just ignore if it's default unix domain socket
+[ "$source" = "/dev/log" ] && source="" || :
+
+# Handle level ranges
+if [ -z "$level_begin" -a -n "$level_end" ]; then
+	level_begin=`echo $priority_order | cut -d " " -f 1`
+elif [ -n "$level_begin" -a -z "$level_end" ]; then
+	level_end=$level_begin
+fi
+if [ "$level_begin" = "debug" -a "$level_end" = "*" -o "$level_begin" = "*" -a "$level_end" = "emerg" ]; then
+	level_begin="*"
+	level_end="*"
+elif [ "$level_begin" = "debug" -a "$level_end" = "emerg" ]; then
+	level_begin="*"
+	level_end="*"
+elif [ "$level_begin" = "*" -a "$level_end" != "*" ]; then
+	level_begin="debug"
+elif [ "$level_begin" != "*" -a "$level_end" = "*" ]; then
+	level_end="emerg"
+fi
+
+# sysklogd handler
+if [ -f /etc/syslog.conf ]; then
+	if [[ -n "$source" ]] && sed "s/#.*$//g" /etc/sysconfig/syslog | grep -q "$source"; then
+		source /etc/sysconfig/syslog
+		SYSLOGD_OPTIONS=`echo $SYSLOGD_OPTIONS | sed "s:[[:space:]]\+-a[[:space:]]\+$source::g"`
+		sed -i -e :a -e \
+		    "s:SYSLOGD_OPTIONS=\"[^\"]*\":SYSLOGD_OPTIONS=\"$SYSLOGD_OPTIONS\":g;/SYSLOGD_OPTIONS/N;//ba" \
+		    /etc/sysconfig/syslog
+	fi
+	if [ -n "$facility" -a -n "$level_begin" -a -n "$logfile" ]; then
+		lvl_begin=$level_begin
+		lvl_end=$level_end
+		if [ "$level_begin" = "*" -a "$level_end" = "*" -o \
+		     "$level_begin" = "debug" -a "$level_end" = "emerge" -o "$level_end" = "panic" ]; then
+			lnum=`grep -n "$logfile" /etc/syslog.conf | sed "s/#.*$//g" | grep "$facility\.\*" | cut -d ":" -f 1`;
+			[ -n "$lnum" ] && sed -i "${lnum}d;" /etc/syslog.conf || :
+			lvl_begin=debug
+			lvl_end=emerg
+		fi
+		levels=`echo $priority_order | sed -n "s:\([^[:space:]]*$lvl_begin.*\):\1:p"`
+		levels=`echo $levels | sed -n "s:\(.*$lvl_end[^[:space:]]*\):\1:p"`
+		levels=`echo $levels | sed 's:,: :g'`
+		for level in $levels; do
+			LNUM=""
+			for lnum in `grep -n "$logfile" /etc/syslog.conf | sed "s/#.*$//g" | grep "$facility" | grep "$level" | cut -d ":" -f 1`; do
+				[ -n "$lnum" ] && LNUM="${LNUM}${lnum}d;" || :
+			done
+			[ -n "$LNUM" ] && sed -i "$LNUM" /etc/syslog.conf || :
+		done
+	fi
+fi
+
+# syslog-ng handler
+# Thanks for Aurélio Marinho Jargas for helping me out with sed
+# expressions, my first expressions were very slow to execute, parsing
+# block oriented config files isn't very simple with line oriented tools
+# like grep or sed
+if [ -f /etc/syslog-ng.conf ]; then
+	# First, make sure each directive is placed at each line, 
+	# eg.: if we have to log directives on the same line (like
+	# "log { ... }; log { ... };" place them in separate lines to
+	# make file look better and make parsing easier
+	sed -i \
+	    -e ':ini' \
+	    -e 's/}; *\(\(source\|destination\|filter\|log\).*\)/}\n\1/;t ini' \
+	    /etc/syslog-ng.conf
+
+	config=`sed "s/#.*$//g" /etc/syslog-ng.conf`
+	if [ -n "$source" ]; then
+		from=`echo $config | sed -n "s:\(.*source[[:space:]]\+\)\([[:alnum:]]\+\)\(.*$source.*\):\2:p"`
+		delete_source $pkg $source
+	else
+		from=`echo $config | sed -n "s:\(.*source[[:space:]]\+\)\([[:alnum:]]\+\)\(.*/dev/log.*\):\2:p"`
+	fi
+	
+	for level in $priority_order; do
+		if echo $level | grep -q $level_begin; then
+			lvl=`echo $level | sed "s:,: :"`
+			c=0
+			for depr in $lvl; do
+				lvl_start[$c]=$depr
+				let c=c+1
+			done
+		fi
+		if echo $level | grep -q $level_end; then
+			lvl=`echo $level | sed "s:,: :"`
+			c=0
+			for depr in $lvl; do
+				lvl_end[$c]=$depr
+				let c=c+1
+			done
+		fi
+	done
+
+	# We must test all possibilities for the given range, as also
+	# test for deprecated name levels.
+	if [ "${lvl_start[0]}" = "${lvl_end[0]}" -o "${lvl_start[0]}" =	"${lvl_end[1]}" ]; then
+		lvl_range[0]="${lvl_start[0]}"
+		lvl_range[1]="${lvl_end[0]}"
+		lvl_label[0]="${lvl_start[0]}"
+		lvl_label[1]="${lvl_end[0]}"
+	else
+		if [ -n "${lvl_start[0]}" -a -n "${lvl_end[0]}" ]; then
+			lvl_range[0]="${lvl_start[0]}..${lvl_end[0]}"
+			lvl_label[0]="${lvl_start[0]}_${lvl_end[0]}"
+		fi
+		if [ -n "${lvl_start[0]}" -a -n "${lvl_end[1]}" ]; then
+			lvl_range[1]="${lvl_start[0]}..${lvl_end[1]}"
+			lvl_label[1]="${lvl_start[0]}_${lvl_end[1]}"
+		fi
+		if [ -n "${lvl_start[1]}" -a -n "${lvl_end[0]}" ]; then
+			lvl_range[2]="${lvl_start[1]}..${lvl_end[0]}"
+			lvl_label[2]="${lvl_start[1]}_${lvl_end[0]}"
+		fi
+		if [ -n "${lvl_start[1]}" -a -n "${lvl_end[1]}" ]; then
+			lvl_range[3]="${lvl_start[1]}..${lvl_end[1]}"
+			lvl_label[3]="${lvl_start[1]}_${lvl_end[1]}"
+		fi
+	fi
+
+	# Remove destination
+	i=0
+	while [ "$i" -lt 4 -a -n "$logfile" ]; do
+		if [ -n "${lvl_label[$i]}" ]; then
+			delete_destination ${pkg}_${lvl_label[$i]} $logfile
+		fi
+		let i=i+1
+	done
+
+	# Remove filter
+	i=0
+	while [ "$i" -lt 4 -a -n "$facility" ]; do
+		j=0
+		while [ "$j" -lt 4 -a -n "${lvl_range[$i]}" ]; do
+			if [ -n "${lvl_label[$j]}" ]; then
+				delete_filter f_${pkg}_${lvl_label[$j]} $facility ${lvl_range[$i]}
+			fi
+			let j=j+1
+		done
+		let i=i+1
+	done
+
+	# Remove log directive
+	if [ -n "$from" ]; then
+		i=0
+		while [ "$i" -lt 4 ]; do
+			j=0
+			while [ "$j" -lt 4 -a -n "${lvl_label[$i]}" ]; do
+				if [ -n "${lvl_label[$j]}" ]; then
+					delete_log $from f_${pkg}_${lvl_label[$i]} ${pkg}_${lvl_label[$j]}
+				fi
+				let j=j+1
+			done
+			let i=i+1
+		done
+	fi
+fi
