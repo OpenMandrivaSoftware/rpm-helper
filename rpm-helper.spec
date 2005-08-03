@@ -10,7 +10,7 @@
 
 Summary: Helper scripts for rpm scriptlets
 Name: rpm-helper
-Version: 0.11
+Version: 0.12
 Release: %mkrel 1
 Source0: %name-%version.tar.bz2
 License: GPL
@@ -47,6 +47,9 @@ rm -rf $RPM_BUILD_ROOT
 %_sys_macros_dir/%name.macros
 
 %changelog
+* Wed Aug 03 2005 Herton Ronaldo Krzesinski <herton@mandriva.com> 0.12-1mdk
+- Version bump: new version that contais syslog helpers
+
 * Thu Jun 30 2005 Olivier Thauvin <nanardon@mandriva.org> 0.11-1mdk
 - provide itself its macro (rpm 4.4 powah)
 - mkrel

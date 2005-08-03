@@ -15,7 +15,8 @@ TAG := $(shell echo "V$(VERSION)_$(RELEASE)" | tr -- '-.' '__')
 FILES = AUTHORS README README.CVS COPYING ChangeLog Makefile \
        $(PACKAGE).spec $(SCRIPTS) $(MACROFILEIN)
 SCRIPTS = add-user del-user add-service del-service create-file \
-	add-group del-group add-shell del-shell verify-shell
+	add-group del-group add-shell del-shell verify-shell \
+	add-syslog del-syslog
 
 LIBDIR=/usr/share/$(PACKAGE)
 RPMACROSDIR=/etc/rpm/macros.d
