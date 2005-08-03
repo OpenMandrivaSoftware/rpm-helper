@@ -1,164 +1,178 @@
-2005-06-30 10:33  Olivier Thauvin <thauvin@aerov.jussieu.fr>
+2005-08-03 08:55  Herton Ronaldo Krzesinski <herton at mandriva.com>
+
+	* add-syslog, del-syslog: - Argh: forgot to add the script files.
+
+2005-08-03 08:50  Herton Ronaldo Krzesinski <herton at mandriva.com>
+
+	* AUTHORS, Makefile, README, README.CVS, rpm-helper.macros.in,
+	  rpm-helper.spec: - Added syslog helpers (currently they support
+	  syslog-ng and sysklogd).  - s/mandrake/mandriva on misc files.
+
+2005-06-30 05:40  Olivier Thauvin <thauvin at aerov.jussieu.fr>
+
+	* rpm-helper.spec: - s/mandrake/mandriva/
+
+2005-06-30 05:33  Olivier Thauvin <thauvin at aerov.jussieu.fr>
 
 	* Makefile, rpm-helper.macros.in, rpm-helper.spec: - make
 	  rpm-helper provide itself its macros
 
-2005-03-09 21:11  Frederic Lepied <flepied@mandrakesoft.com>
+2005-03-09 17:11  Frederic Lepied <flepied at mandriva.com>
 
 	* .cvsignore: first version
 
-2004-09-23 03:03  Frederic Lepied <flepied@mandrakesoft.com>
+2004-09-22 22:03  Frederic Lepied <flepied at mandriva.com>
 
 	* rpm-helper.spec: 0.10-1mdk
 
-2004-09-23 03:02  Frederic Lepied <flepied@mandrakesoft.com>
+2004-09-22 22:02  Frederic Lepied <flepied at mandriva.com>
 
 	* add-service: add the service again on upgrade if the service is
 	  activated
 
-2003-11-01 08:43  Frederic Lepied <flepied@mandrakesoft.com>
+2003-11-01 05:43  Frederic Lepied <flepied at mandriva.com>
 
 	* build-config-file: first version. Needs testing.
 
-2003-09-17 15:52  Frederic Lepied <flepied@mandrakesoft.com>
+2003-09-17 10:52  Frederic Lepied <flepied at mandriva.com>
 
 	* rpm-helper.spec: 0.9.1-1mdk
 
-2003-01-14 21:59  Frederic Lepied <flepied@mandrakesoft.com>
+2003-01-14 18:59  Frederic Lepied <flepied at mandriva.com>
 
 	* rpm-helper.spec: 0.9-1mdk
 
-2002-12-23 00:09  Frederic Lepied <flepied@mandrakesoft.com>
+2002-12-22 21:09  Frederic Lepied <flepied at mandriva.com>
 
 	* rpm-helper.spec: 0.8
 
-2002-12-23 00:08  Frederic Lepied <flepied@mandrakesoft.com>
+2002-12-22 21:08  Frederic Lepied <flepied at mandriva.com>
 
 	* add-group: do not delete supplementary groups already added
 
-2002-12-22 22:46  Frederic Lepied <flepied@mandrakesoft.com>
+2002-12-22 19:46  Frederic Lepied <flepied at mandriva.com>
 
 	* add-user: removed unused variable
 
-2002-12-22 22:42  Frederic Lepied <flepied@mandrakesoft.com>
+2002-12-22 19:42  Frederic Lepied <flepied at mandriva.com>
 
 	* add-service: corrected behaviour when SECURE_LEVEL isn't set
 
-2002-12-22 22:39  Frederic Lepied <flepied@mandrakesoft.com>
+2002-12-22 19:39  Frederic Lepied <flepied at mandriva.com>
 
 	* add-shell: corrected bad grep use
 
-2002-11-07 15:01  Thierry Vignaud <tvignaud@mandrakesoft.com>
+2002-11-07 12:01  Thierry Vignaud <tvignaud at mandriva.com>
 
 	* add-shell: keep /etc/shells sorted, thus enabling to ensure uniq
 	  entries
 
-2002-11-05 15:20  Thierry Vignaud <tvignaud@mandrakesoft.com>
+2002-11-05 12:20  Thierry Vignaud <tvignaud at mandriva.com>
 
 	* Makefile, add-shell, del-shell, rpm-helper.spec, verify-shell:
 	  add verify-shell
 
-2002-11-05 14:36  Thierry Vignaud <tvignaud@mandrakesoft.com>
+2002-11-05 11:36  Thierry Vignaud <tvignaud at mandriva.com>
 
 	* rpm-helper.spec: 0.7.1mdk
 
-2002-11-05 14:36  Thierry Vignaud <tvignaud@mandrakesoft.com>
+2002-11-05 11:36  Thierry Vignaud <tvignaud at mandriva.com>
 
 	* Makefile: - add {add,del}-shell
 
 	  - add localsrpm target
 
-2002-11-05 14:35  Thierry Vignaud <tvignaud@mandrakesoft.com>
+2002-11-05 11:35  Thierry Vignaud <tvignaud at mandriva.com>
 
 	* AUTHORS: add me
 
-2002-11-05 14:35  Thierry Vignaud <tvignaud@mandrakesoft.com>
+2002-11-05 11:35  Thierry Vignaud <tvignaud at mandriva.com>
 
 	* add-shell, del-shell: add {add,del}-shell
 
-2002-09-06 09:22  Frederic Lepied <flepied@mandrakesoft.com>
+2002-09-06 04:22  Frederic Lepied <flepied at mandriva.com>
 
 	* rpm-helper.spec: add conflicts with chkconfig
 
-2002-09-06 09:14  Frederic Lepied <flepied@mandrakesoft.com>
+2002-09-06 04:14  Frederic Lepied <flepied at mandriva.com>
 
 	* rpm-helper.spec: 0.6-1mdk
 
-2002-09-06 09:12  Frederic Lepied <flepied@mandrakesoft.com>
+2002-09-06 04:12  Frederic Lepied <flepied at mandriva.com>
 
 	* add-service: do the security stuff
 
-2002-08-01 19:39  Frederic Lepied <flepied@mandrakesoft.com>
+2002-08-01 14:39  Frederic Lepied <flepied at mandriva.com>
 
 	* rpm-helper.spec: 0.5-1mdk
 
-2002-08-01 19:39  Frederic Lepied <flepied@mandrakesoft.com>
+2002-08-01 14:39  Frederic Lepied <flepied at mandriva.com>
 
 	* add-service: restart services that depend of portmap
 
-2002-07-31 10:47  Frederic Lepied <flepied@mandrakesoft.com>
+2002-07-31 05:47  Frederic Lepied <flepied at mandriva.com>
 
 	* rpm-helper.spec: 0.4.1-1mdk
 
-2002-07-31 10:47  Frederic Lepied <flepied@mandrakesoft.com>
+2002-07-31 05:47  Frederic Lepied <flepied at mandriva.com>
 
 	* add-group: corrected group add without a user to add
 
-2002-07-29 17:25  Frederic Lepied <flepied@mandrakesoft.com>
+2002-07-29 12:25  Frederic Lepied <flepied at mandriva.com>
 
 	* rpm-helper.spec: 0.4-1mdk
 
-2002-07-29 17:25  Frederic Lepied <flepied@mandrakesoft.com>
+2002-07-29 12:25  Frederic Lepied <flepied at mandriva.com>
 
 	* add-user: removed group management
 
-2002-07-29 17:24  Frederic Lepied <flepied@mandrakesoft.com>
+2002-07-29 12:24  Frederic Lepied <flepied at mandriva.com>
 
 	* del-group: added comment
 
-2002-07-29 17:22  Frederic Lepied <flepied@mandrakesoft.com>
+2002-07-29 12:22  Frederic Lepied <flepied at mandriva.com>
 
 	* add-group: corrected group argument passing
 
-2002-07-29 17:16  Frederic Lepied <flepied@mandrakesoft.com>
+2002-07-29 12:16  Frederic Lepied <flepied at mandriva.com>
 
 	* Makefile: add-group del-group
 
-2002-07-29 16:15  Frederic Lepied <flepied@mandrakesoft.com>
+2002-07-29 11:15  Frederic Lepied <flepied at mandriva.com>
 
 	* del-group, add-group: first version
 
-2002-07-12 17:22  Frederic Lepied <flepied@mandrakesoft.com>
+2002-07-12 12:22  Frederic Lepied <flepied at mandriva.com>
 
 	* rpm-helper.spec: 0.3-1mdk
 
-2002-07-12 17:20  Frederic Lepied <flepied@mandrakesoft.com>
+2002-07-12 12:20  Frederic Lepied <flepied at mandriva.com>
 
 	* add-user: added missing groupadd call
 
-2002-07-12 17:19  Frederic Lepied <flepied@mandrakesoft.com>
+2002-07-12 12:19  Frederic Lepied <flepied at mandriva.com>
 
 	* add-user: added support for extended groups
 
-2002-07-10 15:12  Frederic Lepied <flepied@mandrakesoft.com>
+2002-07-10 10:12  Frederic Lepied <flepied at mandriva.com>
 
 	* rpm-helper.spec: 0.2-1mdk
 
-2002-07-10 15:10  Frederic Lepied <flepied@mandrakesoft.com>
+2002-07-10 10:10  Frederic Lepied <flepied at mandriva.com>
 
 	* Makefile: added create-file
 
-2002-07-10 15:08  Frederic Lepied <flepied@mandrakesoft.com>
+2002-07-10 10:08  Frederic Lepied <flepied at mandriva.com>
 
 	* create-file: first version
 
-2002-07-09 17:04  Frederic Lepied <flepied@mandrakesoft.com>
+2002-07-09 12:04  Frederic Lepied <flepied at mandriva.com>
 
 	* AUTHORS, COPYING, Makefile, README, README.CVS, add-service,
 	  add-user, del-service, del-user, rpm-helper.spec: Initial
 	  revision
 
-2002-07-09 17:04  Frederic Lepied <flepied@mandrakesoft.com>
+2002-07-09 12:04  Frederic Lepied <flepied at mandriva.com>
 
 	* AUTHORS, COPYING, Makefile, README, README.CVS, add-service,
 	  add-user, del-service, del-user, rpm-helper.spec: Initial version
