@@ -12,7 +12,7 @@
 #                   syslog (supported sysklogd and syslog-ng).
 #---------------------------------------------------------------
 
-if [ $# -lt 6 ]; then
+if [ $# -lt 3 ]; then
 	echo "usage: $0 <pkg name> <num installed> <source> <facility> <level_begin> <level_end> <log file>" 1>&2
 	exit 1
 fi
@@ -74,7 +74,7 @@ logfile=$7                      # log file, like /var/log/messages
 
 # Don't readd entry on package updates
 if [ "$num" -ne 1 ]; then
-	return 0
+	exit 0
 fi
 
 # just ignore if it's default unix domain socket
@@ -163,6 +163,7 @@ if [ -f /etc/syslog.conf ]; then
 			echo -e	"$facility.=$level_begin\t\t\t\t\t\t\t$logfile" >> /etc/syslog.conf
 		fi
 	fi
+	[ -f "/etc/rc.d/init.d/syslog" ] && service syslog condrestart
 fi
 
 # syslog-ng handler
@@ -222,13 +223,13 @@ if [ -f /etc/syslog-ng.conf ]; then
 			fi
 		fi
 	elif [ -n "$source" ]; then
-		from=`echo $config | sed -n "s:\(.*source[[:space:]]\+\)\([[:alnum:]]\+\)\(.*/dev/log.*\):\2:p"`
 		if [ -n "$from" ]; then
-			sed -i -e :a -e \
-			    "s:\(source[[:space:]]\+$from[[:space:]]*{[^}]*\)\(}[[:space:]]*\);:\1 unix-stream (\"$source\"); };:g;/source/N;//ba" \
+			sed -i \
+			    "/source/{ :a /}/! { N; ba }; s:\(source[[:space:]]*$from[[:space:]]*{.*\)\([[:space:]]\+}[[:space:]]*;\):\1 unix-stream (\"$source\"); };: }" \
 			    /etc/syslog-ng.conf
 		fi
 	fi
+	[ -f "/etc/rc.d/init.d/syslog-ng" ] && service syslog-ng condrestart
 fi
 
 exit 0

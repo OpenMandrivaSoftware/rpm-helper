@@ -18,7 +18,7 @@
 #                   syslog (supported sysklogd and syslog-ng).
 #---------------------------------------------------------------
 
-if [ $# -lt 6 ]; then
+if [ $# -lt 3 ]; then
 	echo "usage: $0 <pkg name> <num installed> <source> <facility> <level> <log file>" 1>&2
 	exit 1
 fi
@@ -140,7 +140,7 @@ logfile=$7                      # log file, like /var/log/messages
 
 # Don't remove entry on package updates
 if [ "$num" -ne 0 ]; then
-	return 0
+	exit 0
 fi
 
 # Just ignore if it's default unix domain socket
@@ -194,13 +194,10 @@ if [ -f /etc/syslog.conf ]; then
 			[ -n "$LNUM" ] && sed -i "$LNUM" /etc/syslog.conf || :
 		done
 	fi
+	[ -f "/etc/rc.d/init.d/syslog" ] && service syslog condrestart
 fi
 
 # syslog-ng handler
-# Thanks for Aurélio Marinho Jargas for helping me out with sed
-# expressions, my first expressions were very slow to execute, parsing
-# block oriented config files isn't very simple with line oriented tools
-# like grep or sed
 if [ -f /etc/syslog-ng.conf ]; then
 	# First, make sure each directive is placed at each line, 
 	# eg.: if we have to log directives on the same line (like
@@ -218,23 +215,27 @@ if [ -f /etc/syslog-ng.conf ]; then
 	else
 		from=`echo $config | sed -n "s:\(.*source[[:space:]]\+\)\([[:alnum:]]\+\)\(.*/dev/log.*\):\2:p"`
 	fi
-	
+
 	for level in $priority_order; do
-		if echo $level | grep -q $level_begin; then
-			lvl=`echo $level | sed "s:,: :"`
-			c=0
-			for depr in $lvl; do
-				lvl_start[$c]=$depr
-				let c=c+1
-			done
+		if [ -n "$level_begin" ]; then
+			if echo $level | grep -q $level_begin; then
+				lvl=`echo $level | sed "s:,: :"`
+				c=0
+				for depr in $lvl; do
+					lvl_start[$c]=$depr
+					let c=c+1
+				done
+			fi
 		fi
-		if echo $level | grep -q $level_end; then
-			lvl=`echo $level | sed "s:,: :"`
-			c=0
-			for depr in $lvl; do
-				lvl_end[$c]=$depr
-				let c=c+1
-			done
+		if [ -n "$level_end" ]; then
+			if echo $level | grep -q $level_end; then
+				lvl=`echo $level | sed "s:,: :"`
+				c=0
+				for depr in $lvl; do
+					lvl_end[$c]=$depr
+					let c=c+1
+				done
+			fi
 		fi
 	done
 
@@ -300,4 +301,6 @@ if [ -f /etc/syslog-ng.conf ]; then
 			let i=i+1
 		done
 	fi
+
+	[ -f "/etc/rc.d/init.d/syslog-ng" ] && service syslog-ng condrestart
 fi
