@@ -170,7 +170,9 @@ fi
 if [ -f /etc/syslog-ng.conf ]; then
 	config=`sed "s/#.*$//g" /etc/syslog-ng.conf`
 	add_blank_line /etc/syslog-ng.conf
-	if ! sed "s/#.*$//g" /etc/syslog-ng.conf | grep -q "$source"; then
+	if [ -z "$source" ]; then
+		from=`echo $config | sed -n "s:\(.*source[[:space:]]\+\)\([[:alnum:]]\+\)\(.*/dev/log.*\):\2:p"`
+	elif ! sed "s/#.*$//g" /etc/syslog-ng.conf | grep -q "$source"; then
 		if [ -n "$facility" -o -n "$level_begin" -a -n "$logfile" ]; then
 			echo "source $pkg { unix-stream (\"$source\"); };" >> /etc/syslog-ng.conf
 			from=$pkg
