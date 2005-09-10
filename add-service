@@ -1,6 +1,6 @@
 #!/bin/sh
 #---------------------------------------------------------------
-# Project         : Mandrake Linux
+# Project         : Mandriva Linux
 # Module          : rpm-helper
 # File            : add-service
 # Version         : $Id$
@@ -19,36 +19,47 @@ pkg=$1				# name of the package
 num=$2				# number of packages installed
 srv=$3				# name of the service
 
+add_chkconfig_service() {
+    srv=$1
+
+    /sbin/chkconfig --add $srv
+
+    if [ -r /etc/sysconfig/system ]; then
+	. /etc/sysconfig/system
+    fi
+
+    if [ -z "$ADD_SERVICES_TO_CURRENT_PROFILE_ONLY" ]; then
+	# add the service to all the profiles at once
+	if [ -d /etc/netprofile/profiles/default/services ]; then
+	    for dir in /etc/netprofile/profiles/*/services; do
+		touch $dir/$srv
+	    done
+	fi
+    fi
+}
+
 add_service() {
     # Add the service
     if [ -r /etc/sysconfig/msec ]; then
 	. /etc/sysconfig/msec
     fi
-    if [[ -n "$SECURE_LEVEL" ]] && [[ "$SECURE_LEVEL" -gt 3 ]]; then
-	# High security: add only authorized services
-	LIST=/etc/security/msec/server
-	# during the install the symlink isn't done so find the right file
-	# by ourseleves
-	if [ -n "$DURING_INSTALL" -a ! -f $LIST ]; then
-	    LIST=/etc/security/msec/server.$SECURE_LEVEL
-	fi
-	if [ -f $LIST ]; then
-	    if grep -q "^${srv}$" $LIST ; then
-		/sbin/chkconfig --add $srv
-	    fi
-	else
-	    # do an exception for initscripts services that could be installed
-	    # before msec and should anyway be added
-	    if [ $pkg = initscripts ]; then
-		/sbin/chkconfig --add $srv
-	    else
-		echo "add-service: $srv not added because /etc/security/msec/server is not present." 1>&2
-		echo "You should run msec to correct that." 1>&2
-	    fi
+    
+    # High security: add only authorized services
+    LIST=/etc/security/msec/server
+
+    # during the install the symlink isn't done so find the right file
+    # by ourselves
+    if [ -n "$DURING_INSTALL" -a ! -f $LIST ]; then
+	LIST=/etc/security/msec/server.$SECURE_LEVEL
+    fi
+
+    if [ -f $LIST ]; then
+	if grep -q "^${srv}$" $LIST ; then
+	    add_chkconfig_service $srv
 	fi
     else
 	# Low security: install all the services
-	/sbin/chkconfig --add $srv
+	add_chkconfig_service $srv
     fi
 }
 
