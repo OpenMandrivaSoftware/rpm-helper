@@ -1,4 +1,5 @@
 #############################################################################
+# Project       : Mandriva Linux
 # File		: Makefile
 # Package	: rpm-helper
 # Author	: Frederic Lepied
@@ -23,6 +24,8 @@ RPMACROSDIR=/etc/rpm/macros.d
 
 MACROFILEIN = $(PACKAGE).macros.in
 MACROFILE = $(MACROFILEIN:.in=)
+
+RPMOPT = --clean --rmsource --rmspec
 
 all:
 	@echo "done"
@@ -63,10 +66,10 @@ tar:
 	rm -rf $(PACKAGE)-$(VERSION)
 
 buildrpm:
-	rpm -ta $(PACKAGE)-$(VERSION).tar.bz2
+	rpm -ta $(RPMOPT) $(PACKAGE)-$(VERSION).tar.bz2
 
 buildsrpm:
-	rpm -ts $(PACKAGE)-$(VERSION).tar.bz2
+	rpm -ts $(RPMOPT) $(PACKAGE)-$(VERSION).tar.bz2
 
 # rules to build a distributable rpm
 
