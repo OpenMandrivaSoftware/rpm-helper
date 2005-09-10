@@ -10,12 +10,12 @@
 
 Summary: Helper scripts for rpm scriptlets
 Name: rpm-helper
-Version: 0.12
+Version: 0.13
 Release: %mkrel 1
 Source0: %name-%version.tar.bz2
 License: GPL
 Group: System/Configuration/Packaging
-URL: http://www.mandriva.com/
+URL: http://www.mandrivalinux.com/
 BuildArchitectures: noarch
 BuildRoot: %_tmppath/%name-buildroot
 Conflicts: chkconfig < 1.3.4-10mdk

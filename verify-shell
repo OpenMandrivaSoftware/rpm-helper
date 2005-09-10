@@ -1,8 +1,8 @@
 #!/bin/sh
 #---------------------------------------------------------------
-# Project         : Mandrake Linux
+# Project         : Mandriva Linux
 # Module          : rpm-helper
-# File            : add-shell
+# File            : verify-shell
 # Version         : $Id$
 # Author          : Thierry Vignaud
 # Created On      : Tue Nov  5 13:52:20 2002
