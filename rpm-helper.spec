@@ -47,6 +47,13 @@ rm -rf $RPM_BUILD_ROOT
 %_sys_macros_dir/%name.macros
 
 %changelog
+* Sat Sep 10 2005 Frederic Lepied <flepied@mandriva.com> 0.13-1mdk
+- add-service: test /etc/security/msec/server wihout taking care of
+  $SECURE_LEVEL (bug #18409).
+- add-service:  add by default the service to all the profiles if
+  ADD_SERVICES_TO_CURRENT_PROFILE_ONLY isn't set in
+  /etc/sysconfig/system.
+
 * Wed Aug 03 2005 Herton Ronaldo Krzesinski <herton@mandriva.com> 0.12-1mdk
 - Version bump: new version that contais syslog helpers
 
