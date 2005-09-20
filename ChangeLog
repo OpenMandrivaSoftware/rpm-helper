@@ -1,3 +1,12 @@
+2005-09-20 09:05  Frederic Lepied <flepied at mandriva.com>
+
+	* rpm-helper.spec: 0.14-1mdk
+
+2005-09-20 09:04  Frederic Lepied <flepied at mandriva.com>
+
+	* add-service: don't add the service to all the profiles in upgrade
+	  mode.
+
 2005-09-10 07:50  Frederic Lepied <flepied at mandriva.com>
 
 	* rpm-helper.spec: 0.13-1mdk
