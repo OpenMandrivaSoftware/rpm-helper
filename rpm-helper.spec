@@ -10,7 +10,7 @@
 
 Summary: Helper scripts for rpm scriptlets
 Name: rpm-helper
-Version: 0.13
+Version: 0.14
 Release: %mkrel 1
 Source0: %name-%version.tar.bz2
 License: GPL
@@ -47,6 +47,9 @@ rm -rf $RPM_BUILD_ROOT
 %_sys_macros_dir/%name.macros
 
 %changelog
+* Tue Sep 20 2005 Frederic Lepied <flepied@mandriva.com> 0.14-1mdk
+- add-service: don't add the service to all the profiles in upgrade mode.
+
 * Sat Sep 10 2005 Frederic Lepied <flepied@mandriva.com> 0.13-1mdk
 - add-service: test /etc/security/msec/server wihout taking care of
   $SECURE_LEVEL (bug #18409).
