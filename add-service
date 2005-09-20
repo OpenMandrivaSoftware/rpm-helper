@@ -72,7 +72,7 @@ else
     # if the service is activated, add it again to be able to handle
     # changes in start/stop levels
     if [ -f /etc/rc3.d/S??$srv ]; then
-	add_service
+	/sbin/chkconfig --add $srv
     fi
     
     # restart the service if already running
