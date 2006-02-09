@@ -1,3 +1,8 @@
+2006-02-09 11:47  Rafael Garcia-Suarez <rgarciasuarez at mandriva.com>
+
+	* add-service: Patch by Ian D. Allen to handle rare case when a
+	  service name appears several times in rc3.d (bug 12856)
+
 2005-09-20 09:05  Frederic Lepied <flepied at mandriva.com>
 
 	* rpm-helper.spec: 0.14-1mdk
