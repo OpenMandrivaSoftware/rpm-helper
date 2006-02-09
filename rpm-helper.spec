@@ -10,16 +10,16 @@
 
 Summary: Helper scripts for rpm scriptlets
 Name: rpm-helper
-Version: 0.14
+Version: 0.15
 Release: %mkrel 1
 Source0: %name-%version.tar.bz2
 License: GPL
 Group: System/Configuration/Packaging
 URL: http://www.mandrivalinux.com/
-BuildArchitectures: noarch
+BuildArch: noarch
 BuildRoot: %_tmppath/%name-buildroot
 Conflicts: chkconfig < 1.3.4-10mdk
-Requires: chkconfig, grep, shadow-utils, chkconfig, coreutils
+Requires: grep, shadow-utils, chkconfig, coreutils
 
 %description
 Helper scripts for rpm scriptlets to help create/remove :
@@ -47,6 +47,9 @@ rm -rf $RPM_BUILD_ROOT
 %_sys_macros_dir/%name.macros
 
 %changelog
+* Thu Feb 09 2006 Rafael Garcia-Suarez <rgarciasuarez@mandriva.com> 0.15-1mdk
+- add-service: handle case when a service name appears several times.
+
 * Tue Sep 20 2005 Frederic Lepied <flepied@mandriva.com> 0.14-1mdk
 - add-service: don't add the service to all the profiles in upgrade mode.
 
