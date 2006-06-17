@@ -1,16 +1,8 @@
-#############################################################################
-# Project         : Mandriva Linux
-# Module          : rpm-helper
-# File            : rpm-helper.spec
-# Version         : $Id$
-# Author          : Frederic Lepied
-# Created On      : Tue Jul  9 08:21:29 2002
-# Purpose         : rpm build rules
-#############################################################################
+# $Id$
 
 Summary: Helper scripts for rpm scriptlets
 Name: rpm-helper
-Version: 0.15
+Version: 0.16
 Release: %mkrel 1
 Source0: %name-%version.tar.bz2
 License: GPL
@@ -31,8 +23,6 @@ Helper scripts for rpm scriptlets to help create/remove :
 %prep
 %setup
 
-%build
-
 %install
 rm -rf $RPM_BUILD_ROOT
 %makeinstall_std LIBDIR=%_datadir/%name
@@ -47,6 +37,9 @@ rm -rf $RPM_BUILD_ROOT
 %_sys_macros_dir/%name.macros
 
 %changelog
+* Sat Jun 17 2006 Olivier Thauvin <nanardon@mandriva.org> 0.16-1mdv2007.0
+- add webapp macros and scrips (G. Rousse)
+
 * Thu Feb 09 2006 Rafael Garcia-Suarez <rgarciasuarez@mandriva.com> 0.15-1mdk
 - add-service: handle case when a service name appears several times.
 
