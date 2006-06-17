@@ -1,0 +1,19 @@
+#!/bin/sh
+
+if [ $# != 2 ]; then
+    echo "usage: $0 <pkg name> <number installed>" 1>&2
+    exit 1
+fi
+
+pkg=$1	# name of the package
+num=$2	# number of packages installed
+
+if [ $num = 0 ]; then
+    # uninstallation: restart web server if running,
+    # a there is one less configuration file
+    /sbin/service httpd condrestart
+else
+    # update: just reload web server if running,
+    # as the number of configuration files didn't change
+    /sbin/service httpd condreload
+fi

@@ -1,0 +1,15 @@
+#!/bin/sh
+
+if [ $# != 2 ]; then
+    echo "usage: $0 <pkg name> <number installed>" 1>&2
+    exit 1
+fi
+
+pkg=$1	# name of the package
+num=$2	# number of packages installed
+
+if [ $num = 1 ]; then
+    # installation: restart web server if running,
+    # as there is a new configuration file
+    /sbin/service httpd condrestart
+fi

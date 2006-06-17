@@ -17,7 +17,7 @@ FILES = AUTHORS README README.CVS COPYING ChangeLog Makefile \
        $(PACKAGE).spec $(SCRIPTS) $(MACROFILEIN)
 SCRIPTS = add-user del-user add-service del-service create-file \
 	add-group del-group add-shell del-shell verify-shell \
-	add-syslog del-syslog
+	add-syslog del-syslog add-webapp del-webapp
 
 LIBDIR=/usr/share/$(PACKAGE)
 RPMACROSDIR=/etc/rpm/macros.d
