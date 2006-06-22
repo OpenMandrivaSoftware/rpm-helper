@@ -48,10 +48,10 @@
 # Web App dir
 
 %_add_webapp_helper @LIBDIR@/add-webapp
-%_post_webapp() %_add_webapp_helper %{name} $1 %{1} \
+%_post_webapp() %_add_webapp_helper %{name} $1 \
 %{nil}
 
 %_del_webapp_helper @LIBDIR@/del-webapp
-%_postun_webapp() %_del_webapp_helper %{name} $1 %{1} \
+%_postun_webapp() %_del_webapp_helper %{name} $1 \
 %{nil}
 
