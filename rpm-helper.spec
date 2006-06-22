@@ -2,7 +2,7 @@
 
 Summary: Helper scripts for rpm scriptlets
 Name: rpm-helper
-Version: 0.16
+Version: 0.17
 Release: %mkrel 1
 Source0: %name-%version.tar.bz2
 License: GPL
@@ -37,6 +37,9 @@ rm -rf $RPM_BUILD_ROOT
 %_sys_macros_dir/%name.macros
 
 %changelog
+* Thu Jun 22 2006 Olivier Thauvin <nanardon@mandriva.org> 0.17-1mdv2007.0
+- fix web macros
+
 * Sat Jun 17 2006 Olivier Thauvin <nanardon@mandriva.org> 0.16-1mdv2007.0
 - add webapp macros and scrips (G. Rousse)
 
