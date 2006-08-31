@@ -9,9 +9,13 @@ pkg=$1	# name of the package
 num=$2	# number of packages installed
 
 if [ $num = 0 ]; then
-    # uninstallation: restart web server if running,
-    # a there is one less configuration file
-    /sbin/service httpd condrestart
+    # in simultaneous removal scenario, web server may 
+    # already have been removed
+    if [ -f /etc/init.d/httpd ]; then
+	# uninstallation: restart web server if running,
+	# a there is one less configuration file
+	/sbin/service httpd condrestart
+    ]
 else
     # update: just reload web server if running,
     # as the number of configuration files didn't change
