@@ -23,8 +23,6 @@ RPMACROSDIR=/etc/rpm/macros.d
 MACROFILEIN = $(PACKAGE).macros.in
 MACROFILE = $(MACROFILEIN:.in=)
 
-RPMOPT = --clean --rmsource --rmspec
-
 all:
 	@echo "done"
 
@@ -43,10 +41,6 @@ version:
 
 # rules to build a test rpm
 
-localrpm: localdist buildrpm
-
-localsrpm: localdist buildsrpm
-
 localdist: cleandist dir localcopy tar
 
 cleandist:
@@ -63,17 +57,9 @@ tar:
 	bzip2 -9vf $(PACKAGE)-$(VERSION).tar
 	rm -rf $(PACKAGE)-$(VERSION)
 
-buildrpm:
-	rpm -ta $(RPMOPT) $(PACKAGE)-$(VERSION).tar.bz2
-
-buildsrpm:
-	rpm -ts $(RPMOPT) $(PACKAGE)-$(VERSION).tar.bz2
-
 # rules to build a distributable rpm
 
-rpm: changelog dist buildrpm
-
-dist: cleandist dir tar
+dist: changelog cleandist dir tar
 
 changelog:
 	svn2cl -o ChangeLog || : 
