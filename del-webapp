@@ -15,7 +15,7 @@ if [ $num = 0 ]; then
 	# uninstallation: restart web server if running,
 	# a there is one less configuration file
 	/sbin/service httpd condrestart
-    ]
+    fi
 else
     # update: just reload web server if running,
     # as the number of configuration files didn't change
