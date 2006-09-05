@@ -9,9 +9,7 @@
 #############################################################################
 
 PACKAGE = rpm-helper
-VERSION := $(shell rpm -q --qf %{VERSION} --specfile $(PACKAGE).spec)
-RELEASE := $(shell rpm -q --qf %{RELEASE} --specfile $(PACKAGE).spec)
-TAG := $(shell echo "V$(VERSION)_$(RELEASE)" | tr -- '-.' '__')
+VERSION := 0.18
 
 FILES = AUTHORS README README.CVS COPYING ChangeLog Makefile \
        $(PACKAGE).spec $(SCRIPTS) $(MACROFILEIN)
