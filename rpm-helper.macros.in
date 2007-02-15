@@ -4,6 +4,10 @@
 %get_password() %_get_password_helper %{1} \
 %{nil}
 
+%_get_free_syslog_facility_helper @LIBDIR@/get_free_syslog_facility
+%get_free_syslog_facility() %_get_free_syslog_facility_helper %{1} \
+%{nil}
+
 %_create_ghostfile_helper @LIBDIR@/create-file
 %create_ghostfile() %_create_ghostfile_helper %{name} $1 %{1} %{2} %{3} %{4} \
 %{nil}
