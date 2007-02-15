@@ -1,65 +1,65 @@
 # $Id$
 
-%_get_password_helper @LIBDIR@/get-password
-%get_password() %_get_password_helper %{1} \
-%{nil}
+%_rpm_helper_dir @pkgdatadir@
 
-%_get_free_syslog_facility_helper @LIBDIR@/get_free_syslog_facility
-%get_free_syslog_facility() %_get_free_syslog_facility_helper %{1} \
-%{nil}
+%_get_password_helper %_rpm_helper_dir/get-password
+%get_password() %(%_get_password_helper %{1})
 
-%_create_ghostfile_helper @LIBDIR@/create-file
+%_get_free_syslog_facility_helper %_rpm_helper_dir/get-free-syslog-facility
+%get_free_syslog_facility() %(%_get_free_syslog_facility_helper)
+
+%_create_ghostfile_helper %_rpm_helper_dir/create-file
 %create_ghostfile() %_create_ghostfile_helper %{name} $1 %{1} %{2} %{3} %{4} \
 %{nil}
 
 # initscripts macros
-%_add_service_helper @LIBDIR@/add-service
+%_add_service_helper %_rpm_helper_dir/add-service
 %_post_service() %_add_service_helper %{name} $1 %{1} \
 %{nil}
 
-%_del_service_helper @LIBDIR@/del-service
+%_del_service_helper %_rpm_helper_dir/del-service
 %_preun_service() %_del_service_helper %{name} $1 %{1} \
 %{nil}
 
-%_add_user_helper @LIBDIR@/add-user
+%_add_user_helper %_rpm_helper_dir/add-user
 %_pre_useradd() %_add_user_helper %{name} $1 %{1} %{2} %{3} \
 %{nil}
 
-%_del_user_helper @LIBDIR@/del-user
+%_del_user_helper %_rpm_helper_dir/del-user
 %_postun_userdel() %_del_user_helper %{name} $1 %{1} \
 %{nil}
 
-%_add_group_helper @LIBDIR@/add-group
+%_add_group_helper %_rpm_helper_dir/add-group
 %_pre_groupadd() %_add_group_helper %{name} $1 %{1} %{?2:%2} \
 %{nil}
 
-%_del_group_helper @LIBDIR@/del-group
+%_del_group_helper %_rpm_helper_dir/del-group
 %_postun_groupdel() %_del_group_helper %{name} $1 %{1} \
 %{nil}
 
-%_add_shell_helper @LIBDIR@/add-shell
+%_add_shell_helper %_rpm_helper_dir/add-shell
 %_post_shelladd() %_add_shell_helper %{name} $1 %{1} \
 %{nil}
 
-%_del_shell_helper @LIBDIR@/del-shell
+%_del_shell_helper %_rpm_helper_dir/del-shell
 %_preun_shelldel() %_del_shell_helper %{name} $1 \
 %{nil}
 
-%_add_syslog_helper @LIBDIR@/add-syslog
+%_add_syslog_helper %_rpm_helper_dir/add-syslog
 %_post_syslogadd() %_add_syslog_helper %{name} $1 %{1} %{?2:%2} %{?3:%3} %{?4:%4} %{?5:%5} \
 %{nil}
 
-%_del_syslog_helper @LIBDIR@/del-syslog
+%_del_syslog_helper %_rpm_helper_dir/del-syslog
 %_preun_syslogdel() %_del_syslog_helper %{name} $1 %{1} %{?2:%2} %{?3:%3} %{?4:%4} %{?5:%5} \
 %{nil}
 
 # Web App dir
 
-%_add_webapp_helper @LIBDIR@/add-webapp
+%_add_webapp_helper %_rpm_helper_dir/add-webapp
 %_post_webapp() %_add_webapp_helper %{name} $1 \
 %{nil}
 
-%_del_webapp_helper @LIBDIR@/del-webapp
+%_del_webapp_helper %_rpm_helper_dir/del-webapp
 %_postun_webapp() %_del_webapp_helper %{name} $1 \
 %{nil}
 
