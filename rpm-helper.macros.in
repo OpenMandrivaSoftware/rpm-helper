@@ -1,5 +1,9 @@
 # $Id$
 
+%_get_password_helper @LIBDIR@/get-password
+%get_password() %_get_password_helper %{1} \
+%{nil}
+
 %_create_ghostfile_helper @LIBDIR@/create-file
 %create_ghostfile() %_create_ghostfile_helper %{name} $1 %{1} %{2} %{3} %{4} \
 %{nil}
