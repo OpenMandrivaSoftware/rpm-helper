@@ -50,7 +50,7 @@ tar:
 dist: changelog cleandist dir localcopy tar svntag
 
 changelog:
-	svn2cl -o ChangeLog || : 
+	svn2cl --strip-prefix soft/rpm/$(PACKAGE)/trunk -o ChangeLog || : 
 	rm -f ChangeLog.bak
 	
 svntag:
