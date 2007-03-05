@@ -1,25 +1,24 @@
 PACKAGE = rpm-helper
-VERSION = 0.18.2
+VERSION = 0.18
 SVNPATH = svn+ssh://svn.mandriva.com/svn/soft/rpm/$(PACKAGE)
 
 SCRIPT_FILES = add-user del-user add-service del-service create-file \
 	       add-group del-group add-shell del-shell verify-shell \
-	       add-syslog del-syslog add-webapp del-webapp \
-	       get-free-syslog-facility get-password
+	       add-syslog del-syslog add-webapp del-webapp
 MACROS_FILES = rpm-helper.macros
 FILES        = AUTHORS README README.CVS COPYING ChangeLog Makefile \
                $(SCRIPT_FILES) $(MACROS_FILES:=.in)
 
-pkgdatadir   = /usr/share/$(PACKAGE)
-rpmmacrosdir = /etc/rpm/macros.d
+pkgdatadir  = /usr/share/$(PACKAGE)
+rpmacrosdir = /etc/rpm/macros.d
 
 all:
 	@echo "use make install or make dist"
 
 install: $(MACROS_FILES)
 	install -d -m 755 $(DESTDIR)$(pkgdatadir)
-	cp -p $(SCRIPT_FILES) $(DESTDIR)$(pkgdatadir)
-	install -d -m 755 $(DESTDIR)$(rpmmacrosdir)
+	cp -p $(SCRIPTS) $(DESTDIR)$(pkgdatadir)
+	install -d -m 755 $(DESTDIR)$(rpmacrosdir)
 	install -m 644 $(MACROS_FILES) $(DESTDIR)/$(rpmmacrosdir)
 
 rpm-helper.macros: rpm-helper.macros.in
@@ -48,10 +47,10 @@ tar:
 
 # rules to build a public distribution
 
-dist: changelog cleandist dir localcopy tar svntag
+dist: changelog cleandist dir localcopy tar
 
 changelog:
-	svn2cl --strip-prefix soft/rpm/$(PACKAGE)/trunk -o ChangeLog || : 
+	svn2cl -o ChangeLog || : 
 	rm -f ChangeLog.bak
 	
 svntag:
