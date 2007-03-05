@@ -19,7 +19,7 @@ all:
 install: $(MACROS_FILES)
 	install -d -m 755 $(DESTDIR)$(pkgdatadir)
 	cp -p $(SCRIPT_FILES) $(DESTDIR)$(pkgdatadir)
-	install -d -m 755 $(DESTDIR)$(rpmacrosdir)
+	install -d -m 755 $(DESTDIR)$(rpmmacrosdir)
 	install -m 644 $(MACROS_FILES) $(DESTDIR)/$(rpmmacrosdir)
 
 rpm-helper.macros: rpm-helper.macros.in
