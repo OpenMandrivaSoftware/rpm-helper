@@ -6,8 +6,8 @@
 %get_password() %_get_password_helper %{1} \
 %{nil}
 
-%_get_free_syslog_facility_helper %_rpm_helper_dir/get_free_syslog_facility
-%get_free_syslog_facility() %_get_free_syslog_facility_helper %{1} \
+%_get_free_syslog_facility_helper %_rpm_helper_dir/get-free-syslog-facility
+%get_free_syslog_facility() %_get_free_syslog_facility_helper \
 %{nil}
 
 %_create_ghostfile_helper %_rpm_helper_dir/create-file
