@@ -4,7 +4,8 @@ SVNPATH = svn+ssh://svn.mandriva.com/svn/soft/rpm/$(PACKAGE)
 
 SCRIPT_FILES = add-user del-user add-service del-service create-file \
 	       add-group del-group add-shell del-shell verify-shell \
-	       add-syslog del-syslog add-webapp del-webapp
+	       add-syslog del-syslog add-webapp del-webapp \
+	       get-free-syslog-facility get-password
 MACROS_FILES = rpm-helper.macros
 FILES        = AUTHORS README README.CVS COPYING ChangeLog Makefile \
                $(SCRIPT_FILES) $(MACROS_FILES:=.in)
