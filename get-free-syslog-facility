@@ -3,9 +3,10 @@
 # helper script for rpm scriptlets to get a free syslog local facility
 
 if [ -f /etc/syslog.conf ]; then
-    cntlog=0
-    while grep -q local${cntlog} /etc/syslog.conf; do 
-	cntlog=$((cntlog+1));
+    for (( i=0; i <= 7; i++ )); do
+	if ! grep -q "local$i" /etc/syslog.conf; then
+	    echo "local$i"
+	    break
+	fi
     done
-    echo local${cntlog}
 fi
