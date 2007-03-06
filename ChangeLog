@@ -1,6 +1,9 @@
 2007-03-06 Guillaume Rousse <guillomovitch@mandriva.org> 0.18.3
 
 	* prefix all rpm macros with underscore for coherency
+	* drop previous macros definition fix, they are supposed to be 
+	  executed at installation, not during build
+	* search for local pattern at the beginning of line in syslog.conf
 	* README files cleanup
 	* switch to a manual Changelog
 
