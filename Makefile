@@ -7,7 +7,7 @@ SCRIPT_FILES = add-user del-user add-service del-service create-file \
 	       add-syslog del-syslog add-webapp del-webapp \
 	       get-free-syslog-facility get-password
 MACROS_FILES = rpm-helper.macros
-FILES        = AUTHORS README README.CVS COPYING ChangeLog Makefile \
+FILES        = AUTHORS README COPYING ChangeLog Makefile \
                $(SCRIPT_FILES) $(MACROS_FILES:=.in)
 
 pkgdatadir   = /usr/share/$(PACKAGE)
@@ -48,11 +48,7 @@ tar:
 
 # rules to build a public distribution
 
-dist: changelog cleandist dir localcopy tar svntag
+dist: cleandist dir localcopy tar svntag
 
-changelog:
-	svn2cl --strip-prefix soft/rpm/$(PACKAGE)/trunk -o ChangeLog || : 
-	rm -f ChangeLog.bak
-	
 svntag:
 	svn cp -m 'version $(VERSION)' $(SVNPATH)/trunk $(SVNPATH)/tags/v$(VERSION)

@@ -1,0 +1,18 @@
+2007-03-06 Guillaume Rousse <guillomovitch@mandriva.org> 0.18.3
+
+	* prefix all rpm macros with underscore for coherency
+	* README files cleanup
+	* switch to a manual Changelog
+
+2007-03-05 Guillaume Rousse <guillomovitch@mandriva.org> 0.18.2
+
+	* fix rpm macros definitions
+
+2007-03-05 Guillaume Rousse <guillomovitch@mandriva.org> 0.18.1
+
+	* fix a typo in makefile preventing installation
+
+2007-03-05 Guillaume Rousse <guillomovitch@mandriva.org> 0.18
+
+	* new helper scripts: get-free-syslog-facility and get-password
+	* Makefile cleanup
