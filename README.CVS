@@ -1,7 +1,0 @@
-To  get  the  last developement  version,  you  may  use CVS  see  the
-http://qa.mandriva.com/twiki/bin/view/Main/CvsGuide page for more information
-how to use cvs.
-
-Then just checkout the rpm-helper module from the base.
-
-Frederic Lepied <flepied@mandriva.com>.
