@@ -4,7 +4,7 @@
 
 if [ -f /etc/syslog.conf ]; then
     for (( i=0; i <= 7; i++ )); do
-	if ! grep -q "local$i" /etc/syslog.conf; then
+	if ! grep -q "^local$i" /etc/syslog.conf; then
 	    echo "local$i"
 	    break
 	fi
