@@ -1,3 +1,8 @@
+2007-03-07 Guillaume Rousse <guillomovitch@mandriva.org> 0.18.4
+
+	* revert to previous name for %create_ghostfile, as my attempt to 
+	  achieve compatibility failed
+
 2007-03-06 Guillaume Rousse <guillomovitch@mandriva.org> 0.18.3
 
 	* prefix all rpm macros with underscore for coherency

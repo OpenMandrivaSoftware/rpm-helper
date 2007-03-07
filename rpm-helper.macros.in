@@ -9,9 +9,8 @@
 %_get_free_syslog_facility() $(%_get_free_syslog_facility_helper)
 
 %_create_ghostfile_helper %_rpm_helper_dir/create-file
-%_create_ghostfile() %_create_ghostfile_helper %{name} $1 %{1} %{2} %{3} %{4} \
+%create_ghostfile() %_create_ghostfile_helper %{name} $1 %{1} %{2} %{3} %{4} \
 %{nil}
-%create_ghostfile %_create_ghostfile
 
 # initscripts macros
 %_add_service_helper %_rpm_helper_dir/add-service
