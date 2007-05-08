@@ -1,3 +1,10 @@
+2007-05-08 Herton Ronaldo Krzesinski <herton@mandriva.com> 0.18.5
+
+	* fixed deprecated chown syntax inside create-file and del-shell
+	  usage inside rpm-helper.macros.in, reported by Vincent Danen on
+	  ticket #30568
+	* fixed my entry in AUTHORS file
+
 2007-03-07 Guillaume Rousse <guillomovitch@mandriva.org> 0.18.4
 
 	* revert to previous name for %create_ghostfile, as my attempt to 
