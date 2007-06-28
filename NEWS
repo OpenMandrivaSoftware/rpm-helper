@@ -1,5 +1,6 @@
 2007-06-29 Guillaume Rousse <guillomovitch@mandriva.org> 0.19.0
 	* new ssl certificate creation helper
+	* renamed ChangeLog to NEWS
 
 2007-05-08 Herton Ronaldo Krzesinski <herton@mandriva.com> 0.18.5
 
