@@ -1,0 +1,56 @@
+#!/bin/sh
+# $Id$
+# helper script for creating ssl certificates
+
+if [ $# -lt 3 ]; then
+    echo "usage: $0 <pkg name> <num installed> <service> <bundle> <group>" 1>&2
+    exit 1
+fi
+
+pkg=$1		# name of the package
+num=$2		# number of packages installed
+srv=$3		# name of the service
+bundle=$4	# bundle mode
+group=$5	# group with read access on key
+
+if [ $num = 1 ]; then
+    host=$(hostname)
+    conffile=/tmp/$$
+    keyfile=/etc/pki/tls/private/$pkg.pem
+    if [ "$bundle" == true ]; then
+	certfile=$keyfile
+    else
+	certfile=/etc/pki/tls/certs/$pkg.pem
+    fi
+
+    # create a temporary configuration file
+    cat > $conffile <<EOF
+default_bits            = 1024
+encrypt_key             = no
+prompt                  = no
+distinguished_name      = req_dn
+req_extensions          = req_ext
+
+[ req_dn ] 
+commonName              = $host
+organizationalUnitName  = default $srv cert for $host
+emailAddress            = root@$host
+
+[ req_ext ]
+basicConstraints        = CA:FALSE
+EOF
+    
+    # generate certificates
+    openssl req -new -x509 -days 365 \
+        -config $conffile \
+        -keyout $keyfile \
+        -out $certfile >/dev/null 2>&1
+
+    # enforce strict perms on key
+    if [ -n "$group" ]; then
+	chmod 640 $keyfile
+	chgrp $group $keyfile
+    else
+	chmod 600 $keyfile
+    fi
+fi
