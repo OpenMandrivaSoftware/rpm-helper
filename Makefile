@@ -1,11 +1,11 @@
 PACKAGE = rpm-helper
-VERSION = 0.18.5
+VERSION = 0.19
 SVNPATH = svn+ssh://svn.mandriva.com/svn/soft/rpm/$(PACKAGE)
 
 SCRIPT_FILES = add-user del-user add-service del-service create-file \
 	       add-group del-group add-shell del-shell verify-shell \
 	       add-syslog del-syslog add-webapp del-webapp \
-	       get-free-syslog-facility get-password
+	       get-free-syslog-facility get-password create-ssl-certificate
 MACROS_FILES = rpm-helper.macros
 FILES        = AUTHORS README COPYING ChangeLog Makefile \
                $(SCRIPT_FILES) $(MACROS_FILES:=.in)
