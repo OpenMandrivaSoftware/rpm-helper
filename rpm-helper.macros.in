@@ -12,7 +12,7 @@
 %create_ghostfile() %_create_ghostfile_helper %{name} $1 %{1} %{2} %{3} %{4} \
 %{nil}
 
-%_create_ssl_certificate_helper %_rpm_helper_dir/create_ssl_certificate
+%_create_ssl_certificate_helper %_rpm_helper_dir/create-ssl-certificate
 %create_ssl_certificate() %_create_ssl_certificate_helper %{name} $1 %{1} %{2} %{3} \
 %{nil}
 
