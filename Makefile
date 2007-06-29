@@ -7,7 +7,7 @@ SCRIPT_FILES = add-user del-user add-service del-service create-file \
 	       add-syslog del-syslog add-webapp del-webapp \
 	       get-free-syslog-facility get-password create-ssl-certificate
 MACROS_FILES = rpm-helper.macros
-FILES        = AUTHORS README COPYING ChangeLog Makefile \
+FILES        = AUTHORS README COPYING NEWS Makefile \
                $(SCRIPT_FILES) $(MACROS_FILES:=.in)
 
 pkgdatadir   = /usr/share/$(PACKAGE)
