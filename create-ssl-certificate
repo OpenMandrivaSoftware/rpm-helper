@@ -14,7 +14,19 @@ bundle=$4	# bundle mode
 group=$5	# group with read access on key
 
 if [ $num = 1 ]; then
+    # default values
     host=$(hostname)
+    KEY_LENGTH=1024
+    CERT_DAYS=365
+    EMAIL_ADDRESS=root@$host
+    COMMON_NAME=$host
+    ORGANISATIONAL_UNIT_NAME="default $srv cert for $host"
+
+    # source configuration
+    if [ -f /etc/sysconfig/ssl ]; then
+	. /etc/sysconfig/ssl
+    fi
+
     conffile=/tmp/$$
     keyfile=/etc/pki/tls/private/$pkg.pem
     if [ "$bundle" == true ]; then
@@ -25,23 +37,23 @@ if [ $num = 1 ]; then
 
     # create a temporary configuration file
     cat > $conffile <<EOF
-default_bits            = 1024
+default_bits            = $KEY_LENGTH
 encrypt_key             = no
 prompt                  = no
 distinguished_name      = req_dn
 req_extensions          = req_ext
 
 [ req_dn ] 
-commonName              = $host
-organizationalUnitName  = default $srv cert for $host
-emailAddress            = root@$host
+commonName              = $COMMON_NAME
+organizationalUnitName  = $ORGANISATIONAL_UNIT_NAME
+emailAddress            = $EMAIL_ADDRESS
 
 [ req_ext ]
 basicConstraints        = CA:FALSE
 EOF
     
     # generate certificates
-    openssl req -new -x509 -days 365 \
+    openssl req -new -x509 -days $CERT_DAYS \
         -config $conffile \
         -keyout $keyfile \
         -out $certfile >/dev/null 2>&1
