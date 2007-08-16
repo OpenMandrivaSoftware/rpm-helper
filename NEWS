@@ -1,3 +1,7 @@
+2007-08-17 Guillaume Rousse <guillomovitch@mandriva.org> 0.19.1
+	* fix usage of ssl certificate creation helper without 3rd argument
+	* allow local certificate configuration
+
 2007-06-29 Guillaume Rousse <guillomovitch@mandriva.org> 0.19.0
 	* new ssl certificate creation helper
 	* renamed ChangeLog to NEWS
