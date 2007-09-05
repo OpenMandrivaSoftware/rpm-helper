@@ -1,3 +1,6 @@
+2007-09-05 Guillaume Rousse <guillomovitch@mandriva.org> 0.19.2
+	* ship a default configuration file for ssl certificate creation helpe
+
 2007-08-17 Guillaume Rousse <guillomovitch@mandriva.org> 0.19.1
 	* fix usage of ssl certificate creation helper without 3rd argument
 	* allow local certificate configuration
