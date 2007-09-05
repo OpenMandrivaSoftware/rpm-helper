@@ -1,237 +1,236 @@
-#!/bin/sh
-#---------------------------------------------------------------
-# Project         : Mandriva Linux
-# Module          : rpm-helper
-# File            : add-syslog
-# Version         : 1
-# Author          : Herton Ronaldo Krzesinski
-# Created On      : Tue Jul 19 23:24:48 2005
-# Modified On     : Sat Jul 30 22:25:00 2005
-# Purpose         : helper script for rpm scriptlets to add a
-#                   entry filter for software from package into
-#                   syslog (supported sysklogd and syslog-ng).
-#---------------------------------------------------------------
+#!/usr/bin/perl
+# rpm helper scriptlet to add a syslog entry (sysklogd and syslog-ng)
+# $Id$
+use Getopt::Long;
+use strict;
 
-if [ $# -lt 3 ]; then
-	echo "usage: $0 <pkg name> <num installed> <source> <facility> <level_begin> <level_end> <log file>" 1>&2
-	exit 1
-fi
+my $source = '/dev/log';
+my $facility = '';
+my $min = 'debug';
+my $max = 'emerg';
+GetOptions(
+    "source=s"   => \$source, 
+    "facility=s" => \$facility,
+    "min=s"      => \$min,
+    "max=s"      => \$max,
+);
 
-priority_order="debug info notice warn,warning err,error crit alert emerg,panic"
+die <<EOF if @ARGV < 3;
+usage: $0 [options] <pkg> <nb> <dest>
+Available options:
+--source   <source>   (default: /dev/log)
+--facility <facility> (default: first local available)
+--min      <priority> (default: debug)
+--max      <priority> (default: emerg)
+EOF
+my ($package, $number, $dest) = @ARGV;
 
-# check range of level priority, example, an level mail.notice in
-# syslog.conf will filter and log notice or greater level of messages
-not_existing_entry() {
-	if [ "$3" = "*" -o "$4" = "*" ]; then
-		if sed "s/#.*$//g" /etc/syslog.conf | grep "$1" | grep -q "$2\.\*" ||
-		   sed "s/#.*$//g" /etc/syslog.conf | grep "$1" | grep -q "$2\.=\*"; then
-		   return 1
-		fi
-		lvl_start=`echo $priority_order | cut -d " " -f 1 | sed "s:,.*::"`
-		num_levels=`echo $priority_order | wc -w`
-		lvl_end=`echo $priority_order | cut -d " " -f $num_levels | sed "s:,.*::"`
-	else
-		lvl_start=$3
-		lvl_end=$4
-	fi
-	local begin=0
-	for x in $priority_order; do
-		if [[ "$begin" -eq 0 ]] && ! echo $x | grep -q "$lvl_start"; then
-			continue
-		fi
-		begin=1
-		x=`echo $x | sed "s:,: :g"`
-		for y in $x; do
-			if sed "s/#.*$//g" /etc/syslog.conf | grep "$1"	| grep -q "$2\.$y"; then
-				return 1
-			fi
-			if sed "s/#.*$//g" /etc/syslog.conf | grep "$1"	| grep -q "$2\.=$y"; then
-				return 1
-			fi
-		done
-		if echo $x | grep -q "$lvl_end"; then
-			return 0
-		fi
-	done
+# don't do anything in upgrade
+exit(0) if $number != 1;
+
+# check arguments
+my @facilities = qw/auth authpriv cron daemon \
+                    kern lpr mail mark news syslog \
+                    user uucp local0 local1 local2 \
+                    local3 local4 local5 local6 local7/;
+my %facilities = map { $_ => 1 } @facilities;
+
+die "invalid facility '$facility'" if $facility && !$facilities{$facility};
+
+my $i;
+my @priorities = qw/debug info notice warning err crit alert emerg/;
+my %priorities = map { $_ => $i++ } @priorities;
+
+die "invalid min priority '$min'" if $min && ! defined $priorities{$min};
+die "invalid max priority '$max'" if $max && ! defined $priorities{$max};
+die "maximum priority '$max' lower than minimum priority '$min'"
+    if $min && $max && ($priorities{$max} < $priorities{$min});
+
+if (!$facility) {
+    my @local_facilities;
+    # parse all configuration files, and count occurences of local facilities
+    if (-f '/etc/syslog.conf') {
+        open(my $in, '<', '/etc/syslog.conf')
+            or die "Can't open /etc/syslog.conf for reading: $!";
+        while (my $line = <$in>) {
+            $local_facilities[$1]++ if $line =~ /^local(\d)/;
+        }
+        close($in);
+    }
+    if (-f '/etc/syslog-ng.conf') {
+         open(my $in, '<', '/etc/syslog-ng.conf')
+            or die "Can't open /etc/syslog-ng.conf for reading: $!";
+        while (my $line = <$in>) {
+            $local_facilities[$1]++ if $line =~ /facility\(local(\d)\)/;
+        }
+        close($in);
+    }
+    # use first facility without occurences
+    for my $i (1 .. 7) {
+        next unless $local_facilities[$i] == 0;
+        $facility = "local$i";
+        last;
+    }
+    die "no available free facility" unless $facility;
 }
 
-add_blank_line() {
-	[ -n "`tail -n 1 $1`" ] && echo >> $1 || :
+add_sysklogd_facility($package, $source, $dest, $facility, $min, $max)
+    if -f '/etc/syslog.conf';
+
+add_syslogng_facility($package, $source, $dest, $facility, $min, $max)
+    if -f '/etc/syslog-ng.conf';
+
+# output used facility as feedback
+print $facility
+
+sub add_sysklogd_facility {
+    my ($package, $source, $dest, $facility, $min, $max) = @_;
+
+    # ensure source is configured
+    if ($source ne '/dev/log') {
+        my ($content, $changed);
+        open(my $in, '<', '/etc/sysconfig/syslog')
+            or die "Can't open /etc/sysconfig/syslog for reading: $!";
+        while (my $line = <$in>) {
+            if ($line =~ /^SYSLOGD_OPTIONS=(["'])?(.*)\1/) {
+                my $quote = $1;
+                my $options = $2;
+                if ($options !~ /-a\s+$source/) {
+                    $options .= " -a $source";
+                    $changed = 1;
+                }
+                $content .=
+                    "SYSLOGD_OPTIONS=" . $quote . $options. $quote . "\n";
+            } else {
+                $content .= $line;
+            }
+        }
+        close($in);
+
+        if ($changed) {
+            open(my $out, '>', '/etc/sysconfig/syslog')
+                or die "Can't open /etc/sysconfig/syslog for writing: $!";
+            print $out $content;
+            close($out);
+        }
+    }
+
+    # compute selector
+    my $selector;
+    if ($max eq 'emerg') {
+        if ($min eq 'debug') {
+            $selector = "$facility.*";
+        } else {
+            $selector = "$facility.$min";
+        }
+    } else {
+        for my $i ($priorities{$min} .. $priorities{$max}) {
+            $selector .= ';' if $selector;
+            $selector .= "$facility.=$priorities[$i]";
+        }
+    }
+
+    # compute spacing to keep default configuration file formatting
+    my $tabs = length($selector) < 48 ?
+        (((48 - length($selector)) / 8) + 1) :
+        1;
+
+    # append entry
+    open(my $out, '>>', '/etc/syslog.conf')
+        or die "Can't open /etc/syslog.conf for appending: $!";
+    print $out "# Automatically added by $package installation\n";
+    print $out $selector . ("\t" x $tabs) . '-' . $dest . "\n";
+    close($out);
+
+    # relaunch syslog
+    system(qw/service syslog condrestart/);
 }
 
-pkg=$1                          # name of the package
-num=$2                          # number of packages installed
-source=$3                       # from where the log will come (log stream)
-                                # NOTE: source must be a unix-stream
-facility=$4                     # subclass of log source, like kern, mail...
-level_begin=$5                  # log level, eg.: info, notice, critical...
-level_end=$6                    # if in a range, you especify level_end
-                                # like when you log from level debug
-				# untill notice. if not in a range
-				# you must specify level_end the same as
-				# level_begin or leave level_end empty
-logfile=$7                      # log file, like /var/log/messages
+sub add_syslogng_facility {
+    my ($package, $source, $dest, $facility, $min, $max) = @_;
 
-# Don't readd entry on package updates
-if [ "$num" -ne 1 ]; then
-	exit 0
-fi
+    # read it first to check its content
+    my ($source_id, $destination_id, $facility_id, $level_id);
+    my $level = $min eq $max ? $max : "$min..$max";
+    open(my $fh, '<', '/etc/syslog-ng.conf')
+        or die "Can't open /etc/syslog-ng.conf for reading: $!";
 
-# just ignore if it's default unix domain socket
-[ "$source" = "/dev/log" ] && source="" || :
+    while (my $line = <$fh>) {
+        if ($line =~ /^source \s+ (\S+) \s+ {/x) {
+            # source block
+            my $id = $1;
+            SOURCE:
+            while (1) {
+                if ($line =~ /(?:unix-stream|file) \s* \( (["']) ([^\1]+) \1/x) {
+                    my $value = $2;
+                    $source_id = $id if $source eq $value;
+                }
+                last SOURCE if $line =~ /};/;
+                $line = <$fh>;
+                last SOURCE if !$line;
+            }
+        } elsif ($line =~ /^destination \s+ (\S+) \s+ {/x) {
+            # destination block
+            my $id = $1;
+            DESTINATION:
+            while (1) {
+                if ($line =~ /file \s* \( (["']) ([^\1]+) \1/x) {
+                    my $value = $2;
+                    $destination_id = $id if $dest eq $value;
+                }
+                last DESTINATION if $line =~ /};/;
+                $line = <$fh>;
+                last DESTINATION if !$line;
+            }
+        } elsif ($line =~ /^filter \s+ (\S+) \s+ {/x) {
+            # filter block
+            my $id = $1;
+            FILTER:
+            while (1) {
+                if ($line =~ /facility \s* \( ([^)]+) \)/x) {
+                    my $value = $1;
+                    $facility_id = $id if $facility eq $value;
+                }
+                if ($line =~ /level \s* \( ([^)]+) \)/x) {
+                    my $value = $1;
+                    $level_id = $id if $level eq $value;
+                }
+                last FILTER if $line =~ /};/;
+                $line = <$fh>;
+                last FILTER if !$line;
+            }
+        }
+        print $line;
+    }
+    close($fh);
 
-# if we only have level_end, assume that level_begin is the lowest
-# priority level order
-if [ -z "$level_begin" -a -n "$level_end" ]; then
-	level_begin=`echo $priority_order | cut -d " " -f 1 | sed "s:,.*::"`
-fi
+    # then append what is needed
+    open(my $out, '>>', '/etc/syslog-ng.conf')
+        or die "Can't open /etc/syslog-ng.conf for appending: $!";
 
-# Do not use deprecated level names, set also label for syslog-ng levels
-for loglevel in $priority_order; do
-	if echo $loglevel | grep -q "$level_begin"; then
-		level_begin=`echo $loglevel | sed s:,.*::`
-		break
-	fi
-done
-if [ -n "$level_end" ]; then
-	for loglevel in $priority_order; do
-		if echo $loglevel | grep -q "$level_end"; then
-			level_end=`echo $loglevel | sed s:,.*::`
-			break
-		fi
-	done
-	level_label=${level_begin}_${level_end}
-else
-	level_label=$level_begin
-fi
+    print $out "# Automatically added by $package installation\n";
+    if (!$source_id) {
+        $source_id = 's_' . $package;
+        print $out "source $source_id { unix-stream('$source'); };\n";
+    }
+    if (!$destination_id) {
+        $destination_id = 'd_' . $package;
+        print $out "destination $destination_id { file('$dest'); };\n";
+    }
+    if (!$facility_id) {
+        $facility_id = 'f_facility_' . $package;
+        print $out "filter $facility_id { facility($facility); };\n";
+    }
+    if (!$level_id) {
+        $level_id = 'f_level_' . $package;
+        print $out "filter $level_id { facility($level); };\n";
+    }
+    print $out "log { source($source_id);" .
+          " filter($facility_id);" .
+          " filter($level_id);" .
+          " destination($destination_id); };\n";
+    close($out);
 
-# Wildcards on begin or end means we want levels until a limit on either side
-# Just use wildcard if range of levels contains all levels
-if [ "$level_begin" = "debug" -a "$level_end" = "*" -o "$level_begin" =	"*" -a "$level_end" = "emerg" ]; then
-	level_begin="*"
-	level_end="*"
-elif [ "$level_begin" = "*" -a "$level_end" != "*" ]; then
-	level_begin="debug"
-elif [ "$level_begin" != "*" -a "$level_end" = "*" ]; then
-	level_end="emerg"
-elif [ "$level_begin" = "debug" -a "$level_end" = "emerg" ]; then
-	level_begin="*"
-	level_end="*"
-fi
-
-# sysklogd handler
-if [ -f /etc/syslog.conf ]; then
-	if [[ -n "$source" ]] && ! grep -q "$source" /etc/sysconfig/syslog; then
-		. /etc/sysconfig/syslog
-		SYSLOGD_OPTIONS="$SYSLOGD_OPTIONS -a $source"
-		sed -i -e :a -e \
-		    "s:SYSLOGD_OPTIONS=\"[^\"]*\":SYSLOGD_OPTIONS=\"$SYSLOGD_OPTIONS\":g;/SYSLOGD_OPTIONS/N;//ba" \
-		    /etc/sysconfig/syslog
-	fi
-	# we first verify if there isn't already a log entry for the
-	# logfile/facility/level provided, and then add the entry to
-	# syslog.conf. Note that we must always remove comments,
-	# otherwise commented lines are interpreted as active
-	if not_existing_entry "$logfile" "$facility" "$level_begin" "$level_end"; then
-		add_blank_line /etc/syslog.conf
-		if [ "$level_begin" = "*" -a "$level_end" = "*" ]; then
-			echo -e "$facility.*\t\t\t\t\t\t\t$logfile" >> /etc/syslog.conf
-		elif [ -n "$level_begin" -a -n "$level_end" -a "$level_begin" != "$level_end" -a "$level_end" = "emerg" ]; then
-			echo -e "$facility.$level_begin\t\t\t\t\t\t\t$logfile" >> /etc/syslog.conf
-		elif [ -n "$level_begin" -a -n "$level_end" -a "$level_begin" != "$level_end" ]; then
-			count=0
-			for loglevel in $priority_order; do
-				if [[ "$count" -eq 0 ]] && ! echo "$loglevel" | grep -q "$level_begin"; then
-					continue
-				fi
-				let count=count+1
-				current_level=`echo $loglevel | sed "s:,.*::"`
-				if ! echo "$loglevel" | grep -q "$level_end"; then
-					echo -n	"$facility.=$current_level;" >> /etc/syslog.conf
-				else
-					echo -n "$facility.=$current_level " >> /etc/syslog.conf
-					break
-				fi
-			done
-			let count=8-count
-			while [ "$count" -gt 0 ]; do
-				echo -ne "\t" >> /etc/syslog.conf
-				let count=count-1
-			done
-			echo -n "$logfile" >> /etc/syslog.conf
-		elif [ -n "$level_begin" ]; then
-			echo -e	"$facility.=$level_begin\t\t\t\t\t\t\t$logfile" >> /etc/syslog.conf
-		fi
-	fi
-	[ -f "/etc/rc.d/init.d/syslog" ] && service syslog condrestart
-fi
-
-# syslog-ng handler
-if [ -f /etc/syslog-ng.conf ]; then
-	config=`sed "s/#.*$//g" /etc/syslog-ng.conf`
-	add_blank_line /etc/syslog-ng.conf
-	if [ -z "$source" ]; then
-		from=`echo $config | sed -n "s:\(.*source[[:space:]]\+\)\([[:alnum:]]\+\)\(.*/dev/log.*\):\2:p"`
-	elif ! sed "s/#.*$//g" /etc/syslog-ng.conf | grep -q "$source"; then
-		if [ -n "$facility" -o -n "$level_begin" -a -n "$logfile" ]; then
-			echo "source $pkg { unix-stream (\"$source\"); };" >> /etc/syslog-ng.conf
-			from=$pkg
-		else
-			from=`echo $config | sed -n "s:\(.*source[[:space:]]\+\)\([[:alnum:]]\+\)\(.*/dev/log.*\):\2:p"`
-		fi
-	else
-		from=`echo $config | sed -n "s:\(.*source[[:space:]]\+\)\([[:alnum:]]\+\)\(.*$source.*\):\2:p"`
-	fi
-	if [ -n "$facility" -o -n "$level_begin" -a -n "$logfile" ]; then
-		if ! sed "s/#.*$//g" /etc/syslog-ng.conf | grep -q "$logfile"; then
-			echo "destination ${pkg}_${level_label} { file(\"$logfile\"); };" >> /etc/syslog-ng.conf
-			dest=${pkg}_${level_label}
-		else
-			dest=`echo $config | sed -n "s:\(.*destination[[:space:]]\+\)\([[:alnum:]]\+\)\(.*$logfile.*\):\2:p"`
-		fi
-
-		if [ -n "$level_begin" -a -n "$level_end" -a "$level_begin" != "$level_end" ]; then
-			level_str="$level_begin..$level_end"
-		elif [ "$level_begin" = "*" -a "$level_end" = "*" ]; then
-			level_str="debug..emerg"
-		elif [ -n "$level_begin" ]; then
-			level_str="$level_begin"
-		fi
-		if ! sed "s/#.*$//g" /etc/syslog-ng.conf | grep "$facility" | grep -q filter; then
-			echo "filter f_${pkg}_${level_label} { facility($facility) and level($level_str); };" >> /etc/syslog-ng.conf
-			filter=f_${pkg}_${level_label}
-		else
-			filter=`echo $config | sed -n "s:\(.*filter[[:space:]]\+\)\([[:alnum:]]\+\)\(.*$facility.*\):\2:p"`
-			curfilt=`echo $config | sed -n "s:\(.*\)\(filter[[:space:]]\+$filter[^}]*};\)\(.*\):\2:gp"`
-			has_level=0
-			levels=`echo $priority_order | sed -n "s:\($level_begin.*\):\1:p"`
-			levels=`echo $levels | sed -n "s:\(.*$level_end\):\1:p"`
-			for log_level in $levels; do
-				if echo $curfilt | grep -q "$log_level"; then
-					has_level=1
-					break
-				fi
-			done
-			if [ "$has_level" -eq 0 ]; then
-				echo "filter f_${pkg}_${level_label} { facility($facility) and level($level_str); };" >> /etc/syslog-ng.conf
-				filter=f_${pkg}_${level_label}
-			fi
-		fi
-		if [ -n "$from" -a -n "$dest" -a -n "$filter" ]; then
-			if ! sed "s/#.*$//g" /etc/syslog-ng.conf | grep "$from"	\
-			   | grep "$dest" | grep "$filter" | grep -q "^[[:space:]]*log"; then
-				echo "log { source($from); filter($filter); destination($dest); };" \
-				     >> /etc/syslog-ng.conf
-			fi
-		fi
-	elif [ -n "$source" ]; then
-		if [ -n "$from" ]; then
-			sed -i \
-			    "/source/{ :a /}/! { N; ba }; s:\(source[[:space:]]*$from[[:space:]]*{.*\)\([[:space:]]\+}[[:space:]]*;\):\1 unix-stream (\"$source\"); };: }" \
-			    /etc/syslog-ng.conf
-		fi
-	fi
-	[ -f "/etc/rc.d/init.d/syslog-ng" ] && service syslog-ng condrestart
-fi
-
-exit 0
+    # relaunch syslog-ng
+    system(qw/service syslog-ng condrestart/);
+}
