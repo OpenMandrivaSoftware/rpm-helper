@@ -7,11 +7,13 @@ SCRIPT_FILES = add-user del-user add-service del-service create-file \
 	       add-syslog del-syslog add-webapp del-webapp \
 	       get-free-syslog-facility get-password create-ssl-certificate
 MACROS_FILES = rpm-helper.macros
+CONF_FILES   = ssl
 FILES        = AUTHORS README COPYING NEWS Makefile \
-               $(SCRIPT_FILES) $(MACROS_FILES:=.in)
+               $(SCRIPT_FILES) $(MACROS_FILES:=.in) $(CONF_FILES)
 
 pkgdatadir   = /usr/share/$(PACKAGE)
 rpmmacrosdir = /etc/rpm/macros.d
+sysconfigdir = /etc/sysconfig
 
 all:
 	@echo "use make install or make dist"
@@ -21,6 +23,8 @@ install: $(MACROS_FILES)
 	cp -p $(SCRIPT_FILES) $(DESTDIR)$(pkgdatadir)
 	install -d -m 755 $(DESTDIR)$(rpmmacrosdir)
 	install -m 644 $(MACROS_FILES) $(DESTDIR)/$(rpmmacrosdir)
+	install -d -m 755 $(DESTDIR)$(sysconfigdir)
+	install -m 644 $(CONF_FILES) $(DESTDIR)/$(sysconfigdir)
 
 rpm-helper.macros: rpm-helper.macros.in
 	sed -e 's:@pkgdatadir@:$(pkgdatadir):' < $< > $@
