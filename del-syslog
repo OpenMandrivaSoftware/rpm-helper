@@ -6,8 +6,14 @@ die <<EOF if @ARGV < 2;
 usage: $0 <pkg> <nb>
 EOF
 
-foreach my $file ('/etc/syslog.conf', '/etc/syslog-ng.conf') {
-    del_syslog_entry($package, $file) if -f $file;
+if (-f '/etc/syslog.conf') {
+    del_syslog_entry($package, '/etc/syslog.conf');
+    system(qw/service syslog condrestart/);
+}
+
+if (-f '/etc/syslog-ng.conf') {
+    del_syslog_entry($package, '/etc/syslog-ng.conf');
+    system(qw/service syslog-ng condrestart/);
 }
 
 sub del_syslog_entry {
