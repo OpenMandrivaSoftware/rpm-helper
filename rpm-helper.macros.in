@@ -52,7 +52,7 @@
 %{nil}
 
 %_del_syslog_helper %_rpm_helper_dir/del-syslog
-%_preun_syslogdel() %_del_syslog_helper %{name} $1 %{1} \
+%_preun_syslogdel() %_del_syslog_helper %{name} $1 \
 %{nil}
 
 # Web App dir
