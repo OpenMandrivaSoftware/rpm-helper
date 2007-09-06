@@ -1,10 +1,15 @@
 #!/usr/bin/perl
 # rpm helper scriptlet to remove a syslog entry (sysklogd and syslog-ng)
 # $Id$
+use strict;
 
 die <<EOF if @ARGV < 2;
 usage: $0 <pkg> <nb>
 EOF
+my ($package, $number) = @ARGV;
+
+# don't do anything for upgrade
+exit(0) if $number == 1;
 
 if (-f '/etc/syslog.conf') {
     del_syslog_entry($package, '/etc/syslog.conf');

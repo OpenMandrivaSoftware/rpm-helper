@@ -23,8 +23,8 @@ Available options:
 EOF
 my ($package, $number, $dest) = @ARGV;
 
-# don't do anything in upgrade
-exit(0) if $number != 1;
+# don't do anything for upgrade
+exit(0) if $number == 2;
 
 # check arguments
 my @facilities = qw/auth authpriv cron daemon \
