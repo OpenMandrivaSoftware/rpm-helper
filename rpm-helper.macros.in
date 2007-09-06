@@ -5,9 +5,6 @@
 %_get_password_helper %_rpm_helper_dir/get-password
 %_get_password() $(%_get_password_helper %{1})
 
-%_get_free_syslog_facility_helper %_rpm_helper_dir/get-free-syslog-facility
-%_get_free_syslog_facility() $(%_get_free_syslog_facility_helper)
-
 %_create_ghostfile_helper %_rpm_helper_dir/create-file
 %create_ghostfile() %_create_ghostfile_helper %{name} $1 %{1} %{2} %{3} %{4} \
 %{nil}
