@@ -47,7 +47,8 @@
 %{nil}
 
 %_add_syslog_helper %_rpm_helper_dir/add-syslog
-%_post_syslogadd() %_add_syslog_helper %{name} $1 %{1} %{?2:%2} %{?3:%3} %{?4:%4} %{?5:%5} \
+%_post_syslogadd(s:f:m:M:) \
+%_add_syslog_helper %{name} $1 %{1} %{?-s:-s %{-s*}} %{?-f:-f %{-f*}} %{?-m:-m %{-m*}} %{?-M:-M %{-M*}} \
 %{nil}
 
 %_del_syslog_helper %_rpm_helper_dir/del-syslog
