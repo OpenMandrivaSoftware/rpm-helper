@@ -136,8 +136,9 @@ sub add_sysklogd_entry {
     # append entry
     open(my $out, '>>', '/etc/syslog.conf')
         or die "Can't open /etc/syslog.conf for appending: $!";
-    print $out "# Automatically added by $package installation\n";
+    print $out "# BEGIN: Automatically added by $package installation\n";
     print $out $selector . ("\t" x $tabs) . '-' . $dest . "\n";
+    print $out "# END\n";
     close($out);
 
     # relaunch syslog
@@ -205,7 +206,7 @@ sub add_syslogng_entry {
     open(my $out, '>>', '/etc/syslog-ng.conf')
         or die "Can't open /etc/syslog-ng.conf for appending: $!";
 
-    print $out "# Automatically added by $package installation\n";
+    print $out "# BEGIN: Automatically added by $package installation\n";
     if (!$source_id) {
         $source_id = 's_' . $package;
         print $out "source $source_id { unix-stream('$source'); };\n";
@@ -226,6 +227,7 @@ sub add_syslogng_entry {
           " filter($facility_id);" .
           " filter($level_id);" .
           " destination($destination_id); };\n";
+    print $out "# END\n";
     close($out);
 
     # relaunch syslog-ng
