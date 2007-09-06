@@ -1,3 +1,6 @@
+2007-09-06 Guillaume Rousse <guillomovitch@mandriva.org> 0.20.0
+	* ship a default configuration file for ssl certificate creation helpe
+
 2007-09-05 Guillaume Rousse <guillomovitch@mandriva.org> 0.19.2
 	* ship a default configuration file for ssl certificate creation helpe
 
