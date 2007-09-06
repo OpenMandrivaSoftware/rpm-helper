@@ -72,16 +72,16 @@ if (!$facility) {
     die "no available free facility" unless $facility;
 }
 
-add_sysklogd_facility($package, $source, $dest, $facility, $min, $max)
+add_sysklogd_entry($package, $source, $dest, $facility, $min, $max)
     if -f '/etc/syslog.conf';
 
-add_syslogng_facility($package, $source, $dest, $facility, $min, $max)
+add_syslogng_entry($package, $source, $dest, $facility, $min, $max)
     if -f '/etc/syslog-ng.conf';
 
 # output used facility as feedback
 print $facility;
 
-sub add_sysklogd_facility {
+sub add_sysklogd_entry {
     my ($package, $source, $dest, $facility, $min, $max) = @_;
 
     # ensure source is configured
@@ -144,7 +144,7 @@ sub add_sysklogd_facility {
     system(qw/service syslog condrestart/);
 }
 
-sub add_syslogng_facility {
+sub add_syslogng_entry {
     my ($package, $source, $dest, $facility, $min, $max) = @_;
 
     # read it first to check its content
