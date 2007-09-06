@@ -1,27 +1,25 @@
 #!/usr/bin/perl
 # rpm helper scriptlet to add a syslog entry (sysklogd and syslog-ng)
 # $Id$
-use Getopt::Long;
+use Getopt::Std;
 use strict;
 
-my $source = '/dev/log';
-my $facility = '';
-my $min = 'debug';
-my $max = 'emerg';
-GetOptions(
-    "source=s"   => \$source, 
-    "facility=s" => \$facility,
-    "min=s"      => \$min,
-    "max=s"      => \$max,
+my %opts = ( 
+    s => '/dev/log',
+    f => undef,
+    m => 'debug',
+    M => 'emerg'
 );
+getopts('s:f:m:M:', \%opts);
+my ($source, $facility, $min, $max) = @opts{qw/s f m M/};
 
 die <<EOF if @ARGV < 3;
 usage: $0 [options] <pkg> <nb> <dest>
 Available options:
---source   <source>   (default: /dev/log)
---facility <facility> (default: first local available)
---min      <priority> (default: debug)
---max      <priority> (default: emerg)
+-s <source>   source (default: /dev/log)
+-f <facility> facility (default: first local available)
+-m <priority> min priority (default: debug)
+-M <priority> max priority (default: emerg)
 EOF
 my ($package, $number, $dest) = @ARGV;
 
@@ -81,7 +79,7 @@ add_syslogng_facility($package, $source, $dest, $facility, $min, $max)
     if -f '/etc/syslog-ng.conf';
 
 # output used facility as feedback
-print $facility
+print $facility;
 
 sub add_sysklogd_facility {
     my ($package, $source, $dest, $facility, $min, $max) = @_;
@@ -132,7 +130,7 @@ sub add_sysklogd_facility {
 
     # compute spacing to keep default configuration file formatting
     my $tabs = length($selector) < 48 ?
-        (((48 - length($selector)) / 8) + 1) :
+        ((48 - length($selector)) / 8) :
         1;
 
     # append entry
@@ -200,7 +198,6 @@ sub add_syslogng_facility {
                 last FILTER if !$line;
             }
         }
-        print $line;
     }
     close($fh);
 
