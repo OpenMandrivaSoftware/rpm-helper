@@ -82,14 +82,6 @@ else
     # restart the service if already running
     if [ -f /var/lock/subsys/$srv ]; then
 	/sbin/service $srv restart > /dev/null 2>/dev/null || :
-	# restart services that depend of portmap
-	if [ $srv = portmap ]; then
-	    for s in amd autofs bootparamd clusternfs mcserv nfs nfslock ypserv ypbind yppasswdd ypxfrd; do
-		if [ -f /var/lock/subsys/$s ]; then
-		    /sbin/service $s restart > /dev/null 2>/dev/null || :
-		fi
-	    done
-	fi
     fi
 fi
 
