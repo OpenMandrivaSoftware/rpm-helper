@@ -2,22 +2,16 @@
 # $Id$
 # helper script for creating ssl certificates
 
-while [ $# -gt 0 ]; do
-    case $1 in
-	   -g) group=$2; shift 2;;
-	   -b) bundle="true"; shift;;
-	    *) args=( ${args[@]:-} $1 ); shift;;
-      esac
-done
-
-pkg=${args[0]}	# name of the package
-num=${args[1]}	# number of packages installed
-srv=${args[2]}	# name of the service
-
-if [ -z "$pkg" -o -z "$num" -o -z "$srv" ]; then
-    echo "usage: $0 [-g <group>] [-b] <pkg name> <num installed> <service>" 1>&2
+if [ $# -lt 3 ]; then
+    echo "usage: $0 <pkg name> <num installed> <service> <bundle> <group>" 1>&2
     exit 1
 fi
+
+pkg=$1		# name of the package
+num=$2		# number of packages installed
+srv=$3		# name of the service
+bundle=$4	# bundle mode
+group=$5	# group with read access on key
 
 if [ $num = 1 ]; then
     # default values
