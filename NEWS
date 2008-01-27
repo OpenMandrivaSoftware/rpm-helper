@@ -1,3 +1,11 @@
+2008-01-27 Guillaume Rousse <guillomovitch@mandriva.org> 0.21.0
+        * ssl certificate creation helper:
+	  - rename macro to %_create-ssl-certificate, by
+	    consistency with all other macros (except %create_ghost_file)
+	  - change its interface to use switches for optional args
+	  - use service name for certificate file, not package name
+	* document all helper macros in README
+
 2007-09-06 Guillaume Rousse <guillomovitch@mandriva.org> 0.20.0
 	* ship a default configuration file for ssl certificate creation helpe
 
