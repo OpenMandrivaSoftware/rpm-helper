@@ -34,11 +34,11 @@ if [ $num = 1 ]; then
     fi
 
     conffile=/tmp/$$
-    keyfile=/etc/pki/tls/private/$pkg.pem
+    keyfile=/etc/pki/tls/private/$srv.pem
     if [ "$bundle" == true ]; then
 	certfile=$keyfile
     else
-	certfile=/etc/pki/tls/certs/$pkg.pem
+	certfile=/etc/pki/tls/certs/$srv.pem
     fi
 
     # create a temporary configuration file
