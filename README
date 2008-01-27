@@ -1,3 +1,57 @@
-rpm-helper is a set of scripts called by rpm scriptlets.
+rpm-helper is a set of helper scripts to be executed at package installation
+time. They are invocated through rpm macros. Here is a list of them, along with
+their usage instructions.
 
-Comments and new scripts welcome.
+%_get_password <length>
+Return a random password from given length (default 8).
+
+%create_ghostfile <package> <number> <file> <owner> <group> <mode>
+Create an empty file, with given owner, group and mode.
+
+%_create_ssl_certificate <package> <number> <name> [-g <group>] [-b]
+Create a ssl key and certificate pair with given name under /etc/pki/tls.
+Optional arguments:
+-b: concatenate certificate with the key file (bundle mode)
+-g: ensure key is readable by given group
+
+%_post_service <package> <number> <service>
+Add given service to boot sequence, by running chkconfig --add on it.
+
+%_preun_service <package> <number> <service>
+Remove given service from boot sequence, by running chkconfig --del on it.
+
+%_pre_useradd <package> <number> <name> <homedir> <shell>
+Add given user, with given homedir and shell.
+
+%_postun_userdel <package> <number> <name>
+Does nothing currently.
+
+%_pre_groupadd <package> <number> <group> [user1,user2,...]
+Add given group, with optional list of coma-separated users as members.
+
+%_postun_groupdel <package> <number> <group>
+Does nothing currently.
+
+%_post_shelladd <package> <number> <shell>
+Add given shell to the list of available system shells.
+
+%_preun_shelldel <package> <number> <shell>
+Remove given shell from the list of available system shells.
+
+%_post_syslogadd <package> <number> <destination> [-s <source>] [-f <facility>] [-m <min>] [-M <max>]
+Add a syslog entry, with given destination (usually a log file), and returns
+used facility. Support sysklogd and syslog-ng.
+Optional arguments:
+-s: ensure given source (usually /dev/log) is readable by syslog daemon.
+-f: use given facility (otherwise first available local one is used).
+-m: use given minimal priority.
+-M: use given maximal priority.
+
+%_preun_syslogdel <package> <number>
+Delete syslog entry created by previous macro. Support sysklogd and syslog-ng.
+
+%_post_webapp <package> <number>
+Handle apache configuration reloading if needed when adding a web application.
+
+%_postun_webapp <package> <number>
+Handle apache configuration reloading if needed when removing a web application.
