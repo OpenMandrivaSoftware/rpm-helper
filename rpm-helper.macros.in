@@ -10,7 +10,7 @@
 %{nil}
 
 %_create_ssl_certificate_helper %_rpm_helper_dir/create-ssl-certificate
-%_create_ssl_certificate() %_create_ssl_certificate_helper %{name} $1 %{1} %{?-g:-g %{-g*}} %{?-b:-b} \
+%_create_ssl_certificate(b:g) %_create_ssl_certificate_helper %{name} $1 %{1} %{?-g:-g %{-g*}} %{?-b:-b} \
 %{nil}
 
 # initscripts macros
