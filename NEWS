@@ -1,3 +1,6 @@
+2008-02-05 Guillaume Rousse <guillomovitch@mandriva.org> 0.21.1
+	* fix %_create-ssl-certificate args
+
 2008-01-27 Guillaume Rousse <guillomovitch@mandriva.org> 0.21.0
         * ssl certificate creation helper:
 	  - rename macro to %_create-ssl-certificate, by
