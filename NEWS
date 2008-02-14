@@ -1,3 +1,6 @@
+2008-02-14 Guillaume Rousse <guillomovitch@mandriva.org> 0.21.2
+	* fix %_create-ssl-certificate args _correctly_
+
 2008-02-05 Guillaume Rousse <guillomovitch@mandriva.org> 0.21.1
 	* fix %_create-ssl-certificate args
 
