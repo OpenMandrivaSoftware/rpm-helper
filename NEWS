@@ -1,3 +1,7 @@
+2008-03-14 Guillaume Rousse <guillomovitch@mandriva.org> 0.21.3
+	* fix error in syslog-ng helper, and avoid spurious error
+	  messages in output
+
 2008-02-14 Guillaume Rousse <guillomovitch@mandriva.org> 0.21.2
 	* fix %_create-ssl-certificate args _correctly_
 
