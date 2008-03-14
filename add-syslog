@@ -142,7 +142,7 @@ sub add_sysklogd_entry {
     close($out);
 
     # relaunch syslog
-    system(qw/service syslog condrestart/);
+    system('service syslog condrestart 2>&1 >/dev/null');
 }
 
 sub add_syslogng_entry {
@@ -231,5 +231,5 @@ sub add_syslogng_entry {
     close($out);
 
     # relaunch syslog-ng
-    system(qw/service syslog-ng condrestart/);
+    system('service syslog-ng condrestart 2>&1 >/dev/null');
 }
