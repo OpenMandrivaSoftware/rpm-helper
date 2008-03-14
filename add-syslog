@@ -221,7 +221,7 @@ sub add_syslogng_entry {
     }
     if (!$level_id) {
         $level_id = 'f_level_' . $package;
-        print $out "filter $level_id { facility($level); };\n";
+        print $out "filter $level_id { level($level); };\n";
     }
     print $out "log { source($source_id);" .
           " filter($facility_id);" .
