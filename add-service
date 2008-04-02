@@ -75,9 +75,12 @@ else
     if [ $# -gt 1 ]; then
 	echo 1>&2 "add-service: Error: $srv appears multiple times: $*"
     fi
-    if [ -f "$1" ]; then
-	/sbin/chkconfig --add $srv
-    fi
+
+# [FIXME] disabling code below for MDV2008.1 to workaround butchered services
+# which have "chkconfig: - ..." and "Default-Start" dropped (#39720)
+#    if [ -f "$1" ]; then
+#	/sbin/chkconfig --add $srv
+#    fi
 
     # restart the service if already running
     if [ -f /var/lock/subsys/$srv ]; then
