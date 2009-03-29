@@ -20,7 +20,7 @@ num=$2				# number of packages installed
 name=$3				# name of the group
 users=$4			# users to add to this group
 
-/usr/sbin/groupadd -r $name > /dev/null 2>&1
+/usr/sbin/groupadd -r $name > /dev/null
 
 if [ -n "$users" ]; then
     SAVED_IFS="$IFS"
@@ -33,7 +33,7 @@ if [ -n "$users" ]; then
 	if [ -n "$old" ]; then
 	    old=`echo ",$old" | sed 's/ /,/g'`
 	fi
-	/usr/sbin/usermod -G $name$old $u > /dev/null 2>&1
+	/usr/sbin/usermod -G $name$old $u > /dev/null
     done
 fi
 

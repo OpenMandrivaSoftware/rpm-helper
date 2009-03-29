@@ -62,7 +62,7 @@ EOF
     openssl req -new -x509 -days $CERT_DAYS \
         -config $conffile \
         -keyout $keyfile \
-        -out $certfile >/dev/null 2>&1
+        -out $certfile >/dev/null
 
     # enforce strict perms on key
     if [ -n "$group" ]; then

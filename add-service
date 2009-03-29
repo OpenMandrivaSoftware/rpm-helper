@@ -84,7 +84,7 @@ else
 
     # restart the service if already running
     if [ -f /var/lock/subsys/$srv ]; then
-	/sbin/service $srv restart > /dev/null 2>/dev/null || :
+	/sbin/service $srv restart > /dev/null || :
     fi
 fi
 
