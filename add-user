@@ -21,7 +21,10 @@ name=$3				# name of the user
 dir=$4				# home directory
 shell=$5			# shell
 
-/usr/sbin/useradd -r -M -s $shell -d $dir -c "system user for $pkg" $name > /dev/null
+if ! id $name /dev/null 2>&1; then
+    /usr/sbin/useradd -r -M \
+    	-s $shell -d $dir -c "system user for $pkg" $name > /dev/null
+fi
 
 exit 0
 
