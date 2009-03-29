@@ -19,7 +19,7 @@ if [ -z "$pkg" -o -z "$num" -o -z "$srv" ]; then
     exit 1
 fi
 
-if [ $num = 1 ]; then
+if [ ! -f /etc/pki/tls/private/$srv.pem ]; then 
     # default values
     host=$(hostname)
     KEY_LENGTH=1024
