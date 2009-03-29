@@ -1,3 +1,9 @@
+2009-03-29 Guillaume Rousse <guillomovitch@mandriva.org> 0.22.0
+	* do not silent stderr output (#48851)
+	* test user/group existence before creating them
+	* do not bypass certificate creation on package update, but 
+	  if key file already exists
+
 2008-04-02 Pixel <pixel@mandriva.com> 0.21.4
 
 	* workaround services "disabled" by default getting disabled on
