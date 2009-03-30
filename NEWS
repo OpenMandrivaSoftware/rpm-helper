@@ -1,3 +1,6 @@
+2009-03-30 Guillaume Rousse <guillomovitch@mandriva.org> 0.22.1
+	* fix stupid typos in user/group creation scriptlets
+
 2009-03-29 Guillaume Rousse <guillomovitch@mandriva.org> 0.22.0
 	* do not silent stderr output (#48851)
 	* test user/group existence before creating them
