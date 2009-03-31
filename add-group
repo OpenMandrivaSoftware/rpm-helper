@@ -20,7 +20,7 @@ num=$2				# number of packages installed
 name=$3				# name of the group
 users=$4			# users to add to this group
 
-if ! getent group $name > /dev/null 2> &1; then
+if ! getent group $name > /dev/null 2>&1; then
     /usr/sbin/groupadd -r $name > /dev/null
 
     if [ -n "$users" ]; then
