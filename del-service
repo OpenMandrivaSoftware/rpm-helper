@@ -20,7 +20,9 @@ num=$2				# number of packages installed
 srv=$3				# name of the service
 
 if [ $num = 0 ]; then
-    /sbin/service $srv stop > /dev/null || :
+    if [ -z "$DURING_INSTALL" ]; then
+	/sbin/service $srv stop > /dev/null || :
+    fi
     /sbin/chkconfig --del $srv
 fi
 

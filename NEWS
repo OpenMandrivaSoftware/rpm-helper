@@ -1,3 +1,8 @@
+2009-10-30 Olivier Blin <blino@mandriva.com> 0.22.2
+	* do not stop service during install
+	  (or else shorewall will be stopped because moved in another
+ 	   package, making the install hang for a while)
+
 2009-03-30 Guillaume Rousse <guillomovitch@mandriva.org> 0.22.1
 	* fix stupid typos in user/group creation scriptlets
 
