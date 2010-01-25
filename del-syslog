@@ -11,19 +11,22 @@ my ($package, $number) = @ARGV;
 # don't do anything for upgrade
 exit(0) if $number == 1;
 
-if (-f '/etc/syslog.conf') {
-    del_syslog_entry($package, '/etc/syslog.conf');
-    system(qw/service syslog condrestart/);
+open(my $fh, '<', '/etc/mandriva-release')
+    or die "can't open /etc/mandriva-release: $!";
+my $line = <$fh>;
+$line =~ /^Mandriva Linux release (\d\d\d\d\.\d)/;
+my $release = $1;
+close($fh);
+
+if (version->parse($release) < version->parse("2010.1")) {
+    del_sysklogd_entry($package);
+} else {
+    del_rsyslog_entry($package);
 }
 
-if (-f '/etc/syslog-ng.conf') {
-    del_syslog_entry($package, '/etc/syslog-ng.conf');
-    system(qw/service syslog-ng condrestart/);
-}
+sub del_sysklogd_entry {
 
-sub del_syslog_entry {
-    my ($package, $file) = @_;
-
+    my $file = "/etc/syslog.conf";
     my $content;
     open(my $in, '<', $file)
         or die "Can't open $file for reading: $!";
@@ -41,4 +44,22 @@ sub del_syslog_entry {
         or die "Can't open $file for writing: $!";
     print $out $content;
     close($out);
+
+    system(qw/service syslog condrestart/);
+}
+
+sub del_rsyslog_entry {
+
+    my $file = "/etc/rsyslog.d/$package.conf";
+
+    # check the file is the one created by package installation
+    open(my $in, '<', $file)
+        or die "Can't open $file for reading: $!";
+    my $line = <$in>;
+    close($in);
+    return if $line ne "# Automatically added by $package installation\n";
+
+    unlink $file
+        or die "Can't delete $file: $!";
+    system(qw/service rsyslog condrestart/);
 }
