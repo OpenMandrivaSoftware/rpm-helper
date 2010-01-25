@@ -168,3 +168,5 @@ sub get_selector {
 
     return $selector;
 }
+
+1;
