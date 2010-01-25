@@ -3,28 +3,33 @@
 # $Id$
 use strict;
 
-die <<EOF if @ARGV < 2;
+main(@ARGV) unless caller();
+
+sub main {
+    die <<EOF if @ARGV < 2;
 usage: $0 <pkg> <nb>
 EOF
-my ($package, $number) = @ARGV;
+    my ($package, $number) = @ARGV;
 
-# don't do anything for upgrade
-exit(0) if $number == 1;
+    # don't do anything for upgrade
+    exit(0) if $number == 1;
 
-open(my $fh, '<', '/etc/mandriva-release')
-    or die "can't open /etc/mandriva-release: $!";
-my $line = <$fh>;
-$line =~ /^Mandriva Linux release (\d\d\d\d\.\d)/;
-my $release = $1;
-close($fh);
+    open(my $fh, '<', '/etc/mandriva-release')
+        or die "can't open /etc/mandriva-release: $!";
+    my $line = <$fh>;
+    $line =~ /^Mandriva Linux release (\d\d\d\d\.\d)/;
+    my $release = $1;
+    close($fh);
 
-if (version->parse($release) < version->parse("2010.1")) {
-    del_sysklogd_entry($package);
-} else {
-    del_rsyslog_entry($package);
+    if (version->parse($release) < version->parse("2010.1")) {
+        del_sysklogd_entry($package);
+    } else {
+        del_rsyslog_entry($package);
+    }
 }
 
 sub del_sysklogd_entry {
+    my ($package) = @_;
 
     my $file = "/etc/syslog.conf";
     my $content;
@@ -49,6 +54,7 @@ sub del_sysklogd_entry {
 }
 
 sub del_rsyslog_entry {
+    my ($package) = @_;
 
     my $file = "/etc/rsyslog.d/$package.conf";
 
@@ -63,3 +69,5 @@ sub del_rsyslog_entry {
         or die "Can't delete $file: $!";
     system(qw/service rsyslog condrestart/);
 }
+
+1;
