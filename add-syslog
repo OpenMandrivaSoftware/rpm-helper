@@ -1,119 +1,157 @@
 #!/usr/bin/perl
-# rpm helper scriptlet to add a syslog entry (sysklogd and syslog-ng)
+# rpm helper scriptlet to add an entry into default syslog implementation
 # $Id$
 use Getopt::Std;
 use strict;
 
-my %opts = ( 
-    s => '/dev/log',
-    f => undef,
-    m => 'debug',
-    M => 'emerg'
-);
-getopts('s:f:m:M:', \%opts);
-my ($source, $facility, $min, $max) = @opts{qw/s f m M/};
-
-die <<EOF if @ARGV < 3;
-usage: $0 [options] <pkg> <nb> <dest>
-Available options:
--s <source>   source (default: /dev/log)
--f <facility> facility (default: first local available)
--m <priority> min priority (default: debug)
--M <priority> max priority (default: emerg)
-EOF
-my ($package, $number, $dest) = @ARGV;
-
-# don't do anything for upgrade
-exit(0) if $number == 2;
-
-# check arguments
 my @facilities = qw/auth authpriv cron daemon \
                     kern lpr mail mark news syslog \
                     user uucp local0 local1 local2 \
                     local3 local4 local5 local6 local7/;
 my %facilities = map { $_ => 1 } @facilities;
-
-die "invalid facility '$facility'" if $facility && !$facilities{$facility};
-
-my $i;
 my @priorities = qw/debug info notice warning err crit alert emerg/;
+my $i;
 my %priorities = map { $_ => $i++ } @priorities;
 
-die "invalid min priority '$min'" if $min && ! defined $priorities{$min};
-die "invalid max priority '$max'" if $max && ! defined $priorities{$max};
-die "maximum priority '$max' lower than minimum priority '$min'"
-    if $min && $max && ($priorities{$max} < $priorities{$min});
+main(@ARGV) unless caller();
 
-if (!$facility) {
-    my @local_facilities;
-    # parse all configuration files, and count occurences of local facilities
-    if (-f '/etc/syslog.conf') {
-        open(my $in, '<', '/etc/syslog.conf')
-            or die "Can't open /etc/syslog.conf for reading: $!";
-        while (my $line = <$in>) {
-            $local_facilities[$1]++ if $line =~ /^local(\d)/;
-        }
-        close($in);
+sub main {
+    my %opts = ( 
+        s => '/dev/log',
+        m => 'debug',
+        M => 'emerg'
+    );
+    getopts('s:m:M:', \%opts);
+    my ($source, $min, $max) = @opts{qw/s f m M/};
+
+    die <<EOF if @ARGV < 4;
+usage: $0 [options] <pkg> <nb> <facility> <dest>
+Available options:
+-s <source>   source (default: /dev/log)
+-m <priority> min priority (default: debug)
+-M <priority> max priority (default: emerg)
+EOF
+    my ($package, $number, $facility, $dest) = @ARGV;
+
+    # don't do anything for upgrade
+    exit(0) if $number == 2;
+
+    # check arguments
+
+    die "invalid facility '$facility'" if $facility && !$facilities{$facility};
+
+    die "invalid min priority '$min'" if $min && ! defined $priorities{$min};
+    die "invalid max priority '$max'" if $max && ! defined $priorities{$max};
+    die "maximum priority '$max' lower than minimum priority '$min'"
+        if $min && $max && ($priorities{$max} < $priorities{$min});
+
+    open(my $fh, '<', '/etc/mandriva-release')
+        or die "can't open /etc/mandriva-release: $!";
+    my $line = <$fh>;
+    $line =~ /^Mandriva Linux release (\d\d\d\d\.\d)/;
+    my $release = $1;
+    close($fh);
+
+    if (version->parse($release) < version->parse("2010.1")) {
+        add_sysklogd_entry($package, $source, $dest, $facility, $min, $max);
+    } else {
+        add_rsyslog_entry($package, $source, $dest, $facility, $min, $max);
     }
-    if (-f '/etc/syslog-ng.conf') {
-         open(my $in, '<', '/etc/syslog-ng.conf')
-            or die "Can't open /etc/syslog-ng.conf for reading: $!";
-        while (my $line = <$in>) {
-            $local_facilities[$1]++ if $line =~ /facility\(local(\d)\)/;
-        }
-        close($in);
-    }
-    # use first facility without occurences
-    for my $i (1 .. 7) {
-        next unless $local_facilities[$i] == 0;
-        $facility = "local$i";
-        last;
-    }
-    die "no available free facility" unless $facility;
 }
-
-add_sysklogd_entry($package, $source, $dest, $facility, $min, $max)
-    if -f '/etc/syslog.conf';
-
-add_syslogng_entry($package, $source, $dest, $facility, $min, $max)
-    if -f '/etc/syslog-ng.conf';
-
-# output used facility as feedback
-print $facility;
 
 sub add_sysklogd_entry {
     my ($package, $source, $dest, $facility, $min, $max) = @_;
 
     # ensure source is configured
-    if ($source ne '/dev/log') {
-        my ($content, $changed);
-        open(my $in, '<', '/etc/sysconfig/syslog')
-            or die "Can't open /etc/sysconfig/syslog for reading: $!";
-        while (my $line = <$in>) {
-            if ($line =~ /^SYSLOGD_OPTIONS=(["'])?(.*)\1/) {
-                my $quote = $1;
-                my $options = $2;
-                if ($options !~ /-a\s+$source/) {
-                    $options .= " -a $source";
-                    $changed = 1;
-                }
-                $content .=
-                    "SYSLOGD_OPTIONS=" . $quote . $options. $quote . "\n";
-            } else {
-                $content .= $line;
-            }
-        }
-        close($in);
-
-        if ($changed) {
-            open(my $out, '>', '/etc/sysconfig/syslog')
-                or die "Can't open /etc/sysconfig/syslog for writing: $!";
-            print $out $content;
-            close($out);
-        }
-    }
+    add_new_source($source, '/etc/sysconfig/syslog')
+        if $source ne '/dev/log';
 
     # compute selector
+    my $selector = get_selector($facility, $min, $max);
+
+    # compute spacing to keep default configuration file formatting
+    my $tabs = length($selector) < 48 ?
+        ((48 - length($selector)) / 8) :
+        1;
+
+    # append entry
+    open(my $out, '>>', '/etc/syslog.conf')
+        or die "Can't open /etc/syslog.conf for appending: $!";
+    print $out "# BEGIN: Automatically added by $package installation\n";
+    print $out "$selector" . ("\t" x $tabs) . "-$dest\n";
+    print $out "# END\n";
+    close($out);
+
+    # relaunch syslog
+    system('service syslog condrestart 2>&1 >/dev/null');
+}
+
+sub add_rsyslog_entry {
+    my ($package, $source, $dest, $facility, $min, $max) = @_;
+
+    # ensure source is configured
+    add_new_source($source, '/etc/sysconfig/rsyslog')
+        if $source ne '/dev/log';
+
+    # compute selector
+    my $selector = get_selector($facility, $min, $max);
+
+    # append entry
+    open(my $out, '>', "/etc/rsyslog.d/$package.conf")
+        or die "Can't open /etc/rsyslog.d/$package.conf for writing: $!";
+    print $out "# Automatically added by $package installation\n";
+    print $out "$selector\t-$dest\n";
+    close($out);
+
+    # relaunch rsyslog
+    system('service rsyslog condrestart 2>&1 >/dev/null');
+}
+
+sub add_new_source {
+    my ($source, $file) = @_;
+
+    my ($content, $changed);
+    open(my $in, '<', $file)
+        or die "Can't open $file for reading: $!";
+
+    while (my $line = <$in>) {
+        if ($line =~ /^SYSLOGD_OPTIONS=(.*)/) {
+            my $options = $1;
+            if ($options) {
+                my $quote;
+                if ($options !~ /-a\s+$source/) {
+                    if ($options =~ /^(["'])(.*)\1$/) {
+                        $quote = $1;
+                        $options = $2;
+                    } else {
+                        $quote = '"';
+                    }
+                    $options = $quote . $options . " -a $source" . $quote;
+                    $changed = 1;
+                }
+            } else {
+                $options = "\"-a $source\"";
+                $changed = 1;
+            }
+
+            $content .= "SYSLOGD_OPTIONS=$options\n";
+        } else {
+            $content .= $line;
+        }
+    }
+    close($in);
+
+    if ($changed) {
+        open(my $out, '>', $file)
+            or die "Can't open $file for writing: $!";
+        print $out $content;
+        close($out);
+    }
+}
+
+sub get_selector {
+    my ($facility, $min, $max) = @_;
+
     my $selector;
     if ($max eq 'emerg') {
         if ($min eq 'debug') {
@@ -128,108 +166,5 @@ sub add_sysklogd_entry {
         }
     }
 
-    # compute spacing to keep default configuration file formatting
-    my $tabs = length($selector) < 48 ?
-        ((48 - length($selector)) / 8) :
-        1;
-
-    # append entry
-    open(my $out, '>>', '/etc/syslog.conf')
-        or die "Can't open /etc/syslog.conf for appending: $!";
-    print $out "# BEGIN: Automatically added by $package installation\n";
-    print $out $selector . ("\t" x $tabs) . '-' . $dest . "\n";
-    print $out "# END\n";
-    close($out);
-
-    # relaunch syslog
-    system('service syslog condrestart 2>&1 >/dev/null');
-}
-
-sub add_syslogng_entry {
-    my ($package, $source, $dest, $facility, $min, $max) = @_;
-
-    # read it first to check its content
-    my ($source_id, $destination_id, $facility_id, $level_id);
-    my $level = $min eq $max ? $max : "$min..$max";
-    open(my $fh, '<', '/etc/syslog-ng.conf')
-        or die "Can't open /etc/syslog-ng.conf for reading: $!";
-
-    while (my $line = <$fh>) {
-        if ($line =~ /^source \s+ (\S+) \s+ {/x) {
-            # source block
-            my $id = $1;
-            SOURCE:
-            while (1) {
-                if ($line =~ /(?:unix-stream|file) \s* \( (["']) ([^\1]+) \1/x) {
-                    my $value = $2;
-                    $source_id = $id if $source eq $value;
-                }
-                last SOURCE if $line =~ /};/;
-                $line = <$fh>;
-                last SOURCE if !$line;
-            }
-        } elsif ($line =~ /^destination \s+ (\S+) \s+ {/x) {
-            # destination block
-            my $id = $1;
-            DESTINATION:
-            while (1) {
-                if ($line =~ /file \s* \( (["']) ([^\1]+) \1/x) {
-                    my $value = $2;
-                    $destination_id = $id if $dest eq $value;
-                }
-                last DESTINATION if $line =~ /};/;
-                $line = <$fh>;
-                last DESTINATION if !$line;
-            }
-        } elsif ($line =~ /^filter \s+ (\S+) \s+ {/x) {
-            # filter block
-            my $id = $1;
-            FILTER:
-            while (1) {
-                if ($line =~ /facility \s* \( ([^)]+) \)/x) {
-                    my $value = $1;
-                    $facility_id = $id if $facility eq $value;
-                }
-                if ($line =~ /level \s* \( ([^)]+) \)/x) {
-                    my $value = $1;
-                    $level_id = $id if $level eq $value;
-                }
-                last FILTER if $line =~ /};/;
-                $line = <$fh>;
-                last FILTER if !$line;
-            }
-        }
-    }
-    close($fh);
-
-    # then append what is needed
-    open(my $out, '>>', '/etc/syslog-ng.conf')
-        or die "Can't open /etc/syslog-ng.conf for appending: $!";
-
-    print $out "# BEGIN: Automatically added by $package installation\n";
-    if (!$source_id) {
-        $source_id = 's_' . $package;
-        print $out "source $source_id { unix-stream('$source'); };\n";
-    }
-    if (!$destination_id) {
-        $destination_id = 'd_' . $package;
-        print $out "destination $destination_id { file('$dest'); };\n";
-    }
-    if (!$facility_id) {
-        $facility_id = 'f_facility_' . $package;
-        print $out "filter $facility_id { facility($facility); };\n";
-    }
-    if (!$level_id) {
-        $level_id = 'f_level_' . $package;
-        print $out "filter $level_id { level($level); };\n";
-    }
-    print $out "log { source($source_id);" .
-          " filter($facility_id);" .
-          " filter($level_id);" .
-          " destination($destination_id); };\n";
-    print $out "# END\n";
-    close($out);
-
-    # relaunch syslog-ng
-    system('service syslog-ng condrestart 2>&1 >/dev/null');
+    return $selector;
 }
