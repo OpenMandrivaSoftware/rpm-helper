@@ -8,8 +8,10 @@ SCRIPT_FILES = add-user del-user add-service del-service create-file \
 	       get-password create-ssl-certificate
 MACROS_FILES = rpm-helper.macros
 CONF_FILES   = ssl
+TEST_FILES   = t/*.t
 FILES        = AUTHORS README COPYING NEWS Makefile \
-               $(SCRIPT_FILES) $(MACROS_FILES:=.in) $(CONF_FILES)
+               $(SCRIPT_FILES) $(MACROS_FILES:=.in) $(CONF_FILES) \
+	       $(TEST_FILES)
 
 pkgdatadir   = /usr/share/$(PACKAGE)
 rpmmacrosdir = /etc/rpm/macros.d
@@ -31,6 +33,9 @@ rpm-helper.macros: rpm-helper.macros.in
 
 clean:
 	rm -f *~
+
+test:
+	perl -I t -MExtUtils::Command::MM -e "test_harness($(TEST_VERBOSE))" $(TEST_FILES)
 
 # rules to build a local distribution
 
