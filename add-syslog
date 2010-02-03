@@ -89,10 +89,6 @@ sub add_sysklogd_entry {
 sub add_rsyslog_entry {
     my ($package, $source, $dest, $facility, $min, $max) = @_;
 
-    # ensure source is configured
-    add_new_source($source, '/etc/sysconfig/rsyslog')
-        if $source ne '/dev/log';
-
     # compute selector
     my $selector = get_selector($facility, $min, $max);
 
@@ -100,11 +96,12 @@ sub add_rsyslog_entry {
     open(my $out, '>', "/etc/rsyslog.d/$package.conf")
         or die "Can't open /etc/rsyslog.d/$package.conf for writing: $!";
     print $out "# Automatically added by $package installation\n";
+    print $out "\$AddUnixListenSocket $source\n" if $source ne '/dev/log';
     print $out "$selector\t-$dest\n";
     close($out);
 
     # relaunch rsyslog
-    system('service rsyslog condrestart 2>&1 >/dev/null');
+    system('service rsyslog condreload 2>&1 >/dev/null');
 }
 
 sub add_new_source {
