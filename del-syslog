@@ -32,6 +32,7 @@ sub del_sysklogd_entry {
     my ($package) = @_;
 
     my $file = "/etc/syslog.conf";
+
     my $content;
     open(my $in, '<', $file)
         or die "Can't open $file for reading: $!";
@@ -57,6 +58,9 @@ sub del_rsyslog_entry {
     my ($package) = @_;
 
     my $file = "/etc/rsyslog.d/$package.conf";
+
+    # check the file exists
+    return unless -f $file;
 
     # check the file is the one created by package installation
     open(my $in, '<', $file)
