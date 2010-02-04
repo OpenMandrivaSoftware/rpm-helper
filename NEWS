@@ -1,3 +1,11 @@
+2010-02-04 Guillaume Rousse <guillomovitch@mandriva.org> 0.23.0
+	* drop ugly workaround from release 0.21.4, various services should
+	  have been fixed now (#52313)
+	* change {add,del}_syslog behaviour to only deal with default
+	  syslog implementation for current release
+	* change {add,del}_syslog interface to make facility argument
+	  mandatory, instead of computing a free one if not given
+
 2009-10-30 Olivier Blin <blino@mandriva.com> 0.22.2
 	* do not stop service during install
 	  (or else shorewall will be stopped because moved in another
