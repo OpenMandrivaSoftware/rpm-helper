@@ -51,7 +51,7 @@ sub del_sysklogd_entry {
     print $out $content;
     close($out);
 
-    system(qw/service syslog condrestart/);
+    system('service syslog condrestart 2>&1 >/dev/null');
 }
 
 sub del_rsyslog_entry {
@@ -71,7 +71,7 @@ sub del_rsyslog_entry {
 
     unlink $file
         or die "Can't delete $file: $!";
-    system(qw/service rsyslog condrestart/);
+    system('service rsyslog condrestart 2>&1 >/dev/null');
 }
 
 1;
