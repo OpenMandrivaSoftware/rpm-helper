@@ -37,7 +37,6 @@ EOF
     exit(0) if $number == 2;
 
     # check arguments
-
     die "invalid facility '$facility'" if $facility && !$facilities{$facility};
 
     die "invalid min priority '$min'" if $min && ! defined $priorities{$min};
@@ -52,10 +51,13 @@ EOF
     my $release = $1;
     close($fh);
 
+    # add an entry to default syslog implementation, if installed
     if (version->parse($release) < version->parse("2010.1")) {
-        add_sysklogd_entry($package, $source, $dest, $facility, $min, $max);
+        add_sysklogd_entry($package, $source, $dest, $facility, $min, $max)
+            if -f '/etc/init.d/syslog';
     } else {
-        add_rsyslog_entry($package, $source, $dest, $facility, $min, $max);
+        add_rsyslog_entry($package, $source, $dest, $facility, $min, $max)
+            if -f '/etc/init.d/rsyslog';
     }
 }
 
