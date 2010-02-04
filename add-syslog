@@ -103,7 +103,7 @@ sub add_rsyslog_entry {
     close($out);
 
     # relaunch rsyslog
-    system('service rsyslog condreload 2>&1 >/dev/null');
+    system('service rsyslog condrestart 2>&1 >/dev/null');
 }
 
 sub add_new_source {
