@@ -22,7 +22,7 @@ sub main {
         M => 'emerg'
     );
     getopts('s:m:M:', \%opts);
-    my ($source, $min, $max) = @opts{qw/s f m M/};
+    my ($source, $min, $max) = @opts{qw/s m M/};
 
     die <<EOF if @ARGV < 4;
 usage: $0 [options] <pkg> <nb> <facility> <dest>
