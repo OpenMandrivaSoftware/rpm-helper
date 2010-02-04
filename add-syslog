@@ -31,7 +31,7 @@ Available options:
 -m <priority> min priority (default: debug)
 -M <priority> max priority (default: emerg)
 EOF
-    my ($package, $number, $facility, $dest) = @ARGV;
+    my ($package, $number, $dest, $facility) = @ARGV;
 
     # don't do anything for upgrade
     exit(0) if $number == 2;
