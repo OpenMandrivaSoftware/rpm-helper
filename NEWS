@@ -1,3 +1,7 @@
+2010-05-29 Guillaume Rousse <guillomovitch@mandriva.org> 0.23.1
+	* force group creation when creating user, whatever /etc/login.defs
+	  says, to ensure expected group ownership (fix #59327)
+
 2010-02-04 Guillaume Rousse <guillomovitch@mandriva.org> 0.23.0
 	* drop ugly workaround from release 0.21.4, various services should
 	  have been fixed now (#52313)
