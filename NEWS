@@ -1,3 +1,5 @@
+	* add systemd support for services addition/removal (#62278)
+
 2010-05-29 Guillaume Rousse <guillomovitch@mandriva.org> 0.23.1
 	* force group creation when creating user, whatever /etc/login.defs
 	  says, to ensure expected group ownership (fix #59327)

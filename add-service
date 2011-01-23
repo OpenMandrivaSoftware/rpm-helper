@@ -24,6 +24,11 @@ add_chkconfig_service() {
 
     /sbin/chkconfig --add $srv
 
+    # support for systemd
+    if [ -x /bin/systemctl ];
+	    /bin/systemctl enable ${srv}.service > /dev/null 2>&1
+    fi
+
     if [ -r /etc/sysconfig/system ]; then
 	. /etc/sysconfig/system
     fi
