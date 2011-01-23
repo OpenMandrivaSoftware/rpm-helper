@@ -1,3 +1,4 @@
+2011-01-23 Eugeni Dodonov <eugeni@mandriva.com> 0.23.2
 	* add systemd support for services addition/removal (#62278)
 
 2010-05-29 Guillaume Rousse <guillomovitch@mandriva.org> 0.23.1
