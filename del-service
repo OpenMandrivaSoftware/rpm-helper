@@ -26,6 +26,7 @@ if [ $num = 0 ]; then
     # support for systemd
     if [ -x /bin/systemctl ];
 	    /bin/systemctl disable ${srv}.service > /dev/null 2>&1
+	    /bin/systemctl daemon-reload
     fi
     /sbin/chkconfig --del $srv
 fi
