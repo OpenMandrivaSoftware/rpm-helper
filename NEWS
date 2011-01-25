@@ -1,3 +1,10 @@
+2011-01-25 Eugeni Dodonov <eugeni@mandriva.com 0.23.5
+	* Fix typo in add-service which made scriplet fail
+
+2011-01-25 nanardon <nanardon@mandriva.org> 0.23.4
+	* make add/del-syslog code more generic
+	* Reload systemd daemon when removing services.
+
 2011-01-23 Eugeni Dodonov <eugeni@mandriva.com> 0.23.3
 	* fix typo in services removal (#62278)
 
