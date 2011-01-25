@@ -44,15 +44,16 @@ EOF
     die "maximum priority '$max' lower than minimum priority '$min'"
         if $min && $max && ($priorities{$max} < $priorities{$min});
 
-    open(my $fh, '<', '/etc/mandriva-release')
-        or die "can't open /etc/mandriva-release: $!";
+    my $release_file = '/etc/release';
+    open(my $fh, '<', $release_file)
+        or die "can't open $release_file: $!";
     my $line = <$fh>;
     $line =~ /^Mandriva Linux release (\d\d\d\d\.\d)/;
     my $release = $1;
     close($fh);
 
     # add an entry to default syslog implementation, if installed
-    if (version->parse($release) < version->parse("2010.1")) {
+    if ($release && version->parse($release) < version->parse("2010.1")) {
         add_sysklogd_entry($package, $source, $dest, $facility, $min, $max)
             if -f '/etc/init.d/syslog';
     } else {

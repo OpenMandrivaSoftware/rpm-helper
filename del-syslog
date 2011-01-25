@@ -14,14 +14,15 @@ EOF
     # don't do anything for upgrade
     exit(0) if $number == 1;
 
-    open(my $fh, '<', '/etc/mandriva-release')
-        or die "can't open /etc/mandriva-release: $!";
+    my $release_file = '/etc/release';
+    open(my $fh, '<', $release_file)
+        or die "can't open $release_file: $!";
     my $line = <$fh>;
     $line =~ /^Mandriva Linux release (\d\d\d\d\.\d)/;
     my $release = $1;
     close($fh);
 
-    if (version->parse($release) < version->parse("2010.1")) {
+    if ($release && version->parse($release) < version->parse("2010.1")) {
         del_sysklogd_entry($package);
     } else {
         del_rsyslog_entry($package);
