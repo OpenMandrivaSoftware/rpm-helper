@@ -1,3 +1,6 @@
+2011-01-25 Eugeni Dodonov <eugeni@mandriva.com 0.23.6
+	* Fix typo in del-service which made scriplet fail
+
 2011-01-25 Eugeni Dodonov <eugeni@mandriva.com 0.23.5
 	* Fix typo in add-service which made scriplet fail
 

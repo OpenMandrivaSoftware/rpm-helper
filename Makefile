@@ -1,5 +1,5 @@
 PACKAGE = rpm-helper
-VERSION = 0.23.5
+VERSION = 0.23.6
 SVNPATH = svn+ssh://svn.mandriva.com/svn/soft/rpm/$(PACKAGE)
 
 SCRIPT_FILES = add-user del-user add-service del-service create-file \
