@@ -83,6 +83,9 @@ else
 
     if [ -f "$1" ]; then
 	/sbin/chkconfig --add $srv
+	if [ -x /bin/systemctl ]; then
+		/bin/systemctl --enable ${srv}.service
+	fi
     fi
 
     # restart the service if already running
