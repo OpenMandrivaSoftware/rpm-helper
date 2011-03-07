@@ -20,7 +20,12 @@ num=$2				# number of packages installed
 srv=$3				# name of the service
 
 systemd=no
+sysv=no
+options=--quiet
+
 [ -x /bin/systemctl -a -r /lib/systemd/system/${srv}.service ] && systemd=yes
+[ -r /etc/rc.d/init.d/${srv} ] && sysv=yes
+[ $sysv = yes ] && options="$options --no-reload"
 
 add_chkconfig_service() {
     srv=$1
@@ -28,10 +33,11 @@ add_chkconfig_service() {
 
     # support for systemd. chkconfig will do daemon-reload for us
     if [ $systemd = yes ]; then
-	    /bin/systemctl --quiet --no-reload enable ${srv}.service
+	/bin/systemctl $options enable ${srv}.service
     fi
-
-    /sbin/chkconfig --add $srv
+    if [ $sysv = yes ]; then
+	/sbin/chkconfig --add $srv
+    fi
 
     if [ -r /etc/sysconfig/system ]; then
 	. /etc/sysconfig/system
@@ -76,7 +82,8 @@ if [ $num = 1 ]; then
     # First install mode
     add_service
 else
-    # Upgrade mode
+    # Upgrade mode. Only really makes sense for SysV scripts
+    [ $sysv = yes ] || exit 0
 
     # if the service is activated, add it again to be able to handle
     # changes in start/stop levels and enable systemd unit as well
@@ -87,7 +94,7 @@ else
 
     if [ -f "$1" ]; then
 	if [ $systemd = yes ]; then
-		/bin/systemctl --quiet --no-reload enable ${srv}.service
+		/bin/systemctl $options enable ${srv}.service
 	fi
 	/sbin/chkconfig --add $srv
     fi
