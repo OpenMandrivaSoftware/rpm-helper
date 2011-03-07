@@ -1,3 +1,6 @@
+2011-03-07 Andrey Borzenkov <arvidjaar@gmail.com> 0.23.7
+	* avoid reloading systemd twice with new chkconfig
+
 2011-01-25 Eugeni Dodonov <eugeni@mandriva.com 0.23.6
 	* Fix typo in del-service which made scriplet fail
 
