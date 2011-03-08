@@ -26,6 +26,7 @@ options=--quiet
 [ -x /bin/systemctl -a -r /lib/systemd/system/${srv}.service ] && systemd=yes
 [ -r /etc/rc.d/init.d/${srv} ] && sysv=yes
 [ $sysv = yes ] && options="$options --no-reload"
+unit=${srv}.service
 
 if [ $num = 0 ]; then
     # Will be redirected to systemd if needed
@@ -35,7 +36,7 @@ if [ $num = 0 ]; then
 
     # support for systemd. chkconfig will do daemon-reload for us
     if [ $systemd = yes ]; then
-	/bin/systemctl $options disable ${srv}.service
+	/bin/systemctl $options disable ${unit}
     fi
     if [ $sysv = yes ]; then
 	/sbin/chkconfig --del $srv
