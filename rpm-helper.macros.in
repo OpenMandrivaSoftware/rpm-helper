@@ -65,3 +65,9 @@
 %_postun_webapp() %_del_webapp_helper %{name} $1 \
 %{nil}
 
+# systemd support
+%_systemd_migrate_service() \
+if [ -x /bin/systemctl ] && /sbin/chkconfig --no-redirect --level=3 %{1}; then \
+	/bin/systemctl --quiet enable %{1}.service \
+fi \
+%{nil}
