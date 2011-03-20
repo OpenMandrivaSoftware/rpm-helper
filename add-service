@@ -4,46 +4,51 @@
 # Module          : rpm-helper
 # File            : add-service
 # Version         : $Id$
-# Author          : Frederic Lepied
+# Authors         : Frederic Lepied, Andrey Borzenkov
 # Created On      : Mon Jul  8 08:14:34 2002
 # Purpose         : helper script for rpm scriptlets to add a
 #		    service.
 #---------------------------------------------------------------
 
-if [ $# != 3 ]; then
-    echo "usage: $0 <pkg name> <number installed> <service name>" 1>&2
+if [ x$1 = x--no-sysv ]; then
+    do_sysv=no
+    shift
+else
+    do_sysv=yes
+fi
+
+if [ $# -lt 3 ]; then
+    echo "usage: $0 [--no-sysv] <pkg name> <number installed> [<service name>] <unit name> ..." 1>&2
     exit 1
 fi
 
 pkg=$1				# name of the package
 num=$2				# number of packages installed
-srv=$3				# name of the service
-
-systemd=no
-sysv=no
-options=--quiet
-
-[ -x /bin/systemctl -a -r /lib/systemd/system/${srv}.service ] && systemd=yes
-[ -r /etc/rc.d/init.d/${srv} ] && sysv=yes
-[ $sysv = yes ] && options="$options --no-reload"
-unit=${srv}.service
+if [ $do_sysv = yes ]; then
+    srv=$3			# name of the SysV script
+    shift 3
+else
+    srv=
+    shift 2
+fi
+units="$*"			# systemd units
+units_to_enable=		# units enabled by msec
 
 add_chkconfig_service() {
-    srv=$1
-
-
-    # support for systemd. chkconfig will do daemon-reload for us
-    if [ $systemd = yes ]; then
-	/bin/systemctl $options enable ${unit}
+    if [ -n "$units_to_enable" ]; then
+	/bin/systemctl --quiet enable $units_to_enable
     fi
-    if [ $sysv = yes ]; then
+    if [ -n "$srv" ]; then
 	/sbin/chkconfig --add $srv
+    else
+	exit 0
     fi
 
     if [ -r /etc/sysconfig/system ]; then
 	. /etc/sysconfig/system
     fi
 
+    # TODO what to do with system units here?
     if [ -z "$ADD_SERVICES_TO_CURRENT_PROFILE_ONLY" ]; then
 	# add the service to all the profiles at once
 	if [ -d /etc/netprofile/profiles/default/services ]; then
@@ -69,39 +74,58 @@ add_service() {
 	LIST=/etc/security/msec/server.$SECURE_LEVEL
     fi
 
+    # This is half-hearted support for msec: we check "srv" for a unit
+    # with name "srv.service". This should account for most(?) common
+    # case when SysV script srv is replaced by single unit srv.service
+    # If SysV name was supplied, we assume units are equivalent and do
+    # not need to be checked.
+    # TODO should msec support full unit name?
     if [ -f $LIST ]; then
-	if grep -q "^${srv}$" $LIST ; then
-	    add_chkconfig_service $srv
+	if [ -n "$srv" ]; then
+	    if fgrep -qx "${srv}" $LIST; then
+		units_to_enable="$units"
+	    else
+		srv=
+	    fi
+	else
+	    for i in $units; do
+		[ $i != ${i%.service} ] && ! fgrep -qx ${i%.service} $LIST && continue
+		units_to_enable="$units_to_enable $i"
+	    done
 	fi
     else
-	# Low security: install all the services
-	add_chkconfig_service $srv
+	units_to_enable="$units"
     fi
+
+    add_chkconfig_service
 }
 
 if [ $num = 1 ]; then
     # First install mode
     add_service
 else
-    # Upgrade mode.
+    # Upgrade mode. systemd units are restarted in postun
+    [ -n "$srv" ] || exit 0
 
     # if the service is activated, add it again to be able to handle
-    # changes in start/stop levels or systemd WantedBy lines
+    # changes in start/stop levels. This does not change enabled/disabled
+    # state, so we do not do it for systemd where dependencies are handled
+    # automatically.
 
-    if [ $systemd = yes ] && /bin/systemctl is-enabled ${unit}; then
-	/bin/systemctl --quiet enable ${unit}
+    # Restart only SysV services here only if no additional systemd
+    # units are defined or systemd is not active. Otherwise user is expected
+    # to add postun script that handles systemd units.
+
+    set -- /etc/rc3.d/S??$srv
+    if [ $# -gt 1 ]; then
+	echo 1>&2 "add-service: Error: $srv appears multiple times: $*"
     fi
 
-    if [ $sysv = yes ]; then
-	set -- /etc/rc3.d/S??$srv
-	if [ $# -gt 1 ]; then
-	    echo 1>&2 "add-service: Error: $srv appears multiple times: $*"
-	fi
+    if [ -f "$1" ]; then
+	/sbin/chkconfig --add $srv
+    fi
 
-	if [ -f "$1" ]; then
-	    /sbin/chkconfig --add $srv
-	fi
-
+    if [ -z "$units" ] || ! /bin/mountpoint -q /sys/fs/cgroup/systemd; then
 	# restart the service if already running
 	if [ -f /var/lock/subsys/$srv ]; then
 	    /sbin/service $srv restart > /dev/null || :

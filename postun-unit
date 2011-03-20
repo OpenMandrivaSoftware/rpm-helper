@@ -1,0 +1,40 @@
+#!/bin/sh
+#---------------------------------------------------------------
+# Project         : Mandriva Linux
+# Module          : rpm-helper
+# File            : postun-unit
+# Version         : $Id$
+# Authors         : Andrey Borzenkov
+# Created On      : Sat Mar 12 18:05:00 2011
+# Purpose         : helper script for rpm scriptlets to remove a
+#		    systemd unit.
+#---------------------------------------------------------------
+
+# Reload systemd configuration and try to restart units
+# It has to be done in postun because package removal may delete
+# some links and we need to inform systemd about it
+
+/bin/mountpoint -q /sys/fs/cgroup/systemd || exit 0
+
+if [ $# -lt 3 ]; then
+    echo "usage: $0 <pkg name> <number installed> <unit> ..." 1>&2
+    exit 1
+fi
+
+pkg=$1				# name of the package
+num=$2				# number of packages installed
+shift 2				# systemd units
+
+/bin/systemctl daemon-reload
+
+if [ $num -ge 1 ]; then
+    if [ -z "$DURING_INSTALL" ]; then
+	    # New package may have removed some units so restart will
+	    # fail for them; catch it.
+	    # TODO find a way to pass parameters from current packages
+	    # into script installed by previous version
+	    /bin/systemctl try-restart "$@" || :
+    fi
+fi
+
+# postun-unit ends here

@@ -1,11 +1,12 @@
 PACKAGE = rpm-helper
-VERSION = 0.23.9
+VERSION = 0.24.0
 SVNPATH = svn+ssh://svn.mandriva.com/svn/soft/rpm/$(PACKAGE)
 
 SCRIPT_FILES = add-user del-user add-service del-service create-file \
 	       add-group del-group add-shell del-shell verify-shell \
 	       add-syslog del-syslog add-webapp del-webapp \
-	       get-password create-ssl-certificate
+	       get-password create-ssl-certificate \
+	       migrate-service postun-unit
 MACROS_FILES = rpm-helper.macros
 CONF_FILES   = ssl
 TEST_FILES   = t/*.t
