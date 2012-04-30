@@ -1,3 +1,7 @@
+2012-04-30 Colin Guthrie <colin@mageia.org> 0.24.10
+	* fix leaking of exit status failure.
+	* prefer native systemd install rules over manual symlinking
+
 2012-04-29 Colin Guthrie <colin@mageia.org> 0.24.9
 	* fix handling of masked and symlinked unit names
 
