@@ -18,8 +18,15 @@ else
 fi
 
 if [ $# -lt 3 ]; then
-    echo "usage: $0 [--no-sysv] <pkg name> <number installed> [<service name>] <unit name> ..." 1>&2
+    echo "usage: $0 [--no-sysv] <pkg name> <number installed> [<service name>] [<unit name> ...]" 1>&2
     exit 1
+fi
+
+# What init system are we currently using?
+if /bin/mountpoint -q /sys/fs/cgroup/systemd; then
+    init=systemd
+else
+    init=sysvinit
 fi
 
 pkg=$1				# name of the package
@@ -33,36 +40,62 @@ else
 fi
 units="$*"			# systemd units
 units_to_enable=		# units enabled by msec
+systemd_migration_dir=/var/lib/rpm-helper/systemd-migration
+mkdir -p "${systemd_migration_dir}"
 
-add_chkconfig_service() {
-    if [ -n "$units_to_enable" ]; then
-	/bin/systemctl --quiet enable $units_to_enable
-    fi
-    if [ -n "$srv" ]; then
-	/sbin/chkconfig --add $srv
-    else
-	exit 0
-    fi
+USERUNITDIR=/etc/systemd/system
+RUNTIMEUNITDIR=/run/systemd/system
+SYSTEMUNITDIR=/lib/systemd/system
 
-    if [ -r /etc/sysconfig/system ]; then
-	. /etc/sysconfig/system
-    fi
+find_unit() {
+    unit=$(basename $1)
 
-    # TODO what to do with system units here?
-    if [ -z "$ADD_SERVICES_TO_CURRENT_PROFILE_ONLY" ]; then
-	# add the service to all the profiles at once
-	if [ -d /etc/netprofile/profiles/default/services ]; then
-	    for dir in /etc/netprofile/profiles/*/services; do
-		touch $dir/$srv
-	    done
-	fi
+    # We need to normalise the systemd unit name as the native unit may not have
+    # the same filename (sans it's .service suffix) as sysvinit script.
+    # In this case, symlinks are used to mask the sysvinit file, but for enabling
+    # and disabling units we must use the official name.
+
+    searchunit=
+    if [ -e "$USERUNITDIR/$unit" ]; then
+        if [ -L "$USERUNITDIR/$unit" ]; then
+            searchunit=$(/usr/bin/readlink -f "$USERUNITDIR/$unit")
+        else
+            searchunit="$USERUNITDIR/$unit"
+        fi
+    elif [ -e "$RUNTIMEUNITDIR/$unit" ]; then
+        if [ -L "$RUNTIMEUNITDIR/$unit" ]; then
+            searchunit=$(/usr/bin/readlink -f "$RUNTIMEUNITDIR/$unit")
+        else
+            searchunit="$RUNTIMEUNITDIR/$unit"
+        fi
+    elif [ -e "$SYSTEMUNITDIR/$unit" ]; then
+        if [ -L "$SYSTEMUNITDIR/$unit" ]; then
+            searchunit=$(/usr/bin/readlink -f "$SYSTEMUNITDIR/$unit")
+        else
+            searchunit="$SYSTEMUNITDIR/$unit"
+        fi
+    fi
+    if [ -n "$searchunit" ]; then
+        echo -n $searchunit
     fi
 }
+
+
+# If only a sysvinit service is given, then deal with a systemd unit of the same
+# name. Specific specs can enable specific unit names as needed but this should
+# catch the most common usage.
+if [ -z "$units" ]; then
+  units="$srv.service"
+  searchunit=$(find_unit $units)
+  if [ -n "$searchunit" ]; then
+    units=$(basename $searchunit)
+  fi
+fi
 
 add_service() {
     # Add the service
     if [ -r /etc/sysconfig/msec ]; then
-	. /etc/sysconfig/msec
+        . /etc/sysconfig/msec
     fi
     
     # High security: add only authorized services
@@ -71,7 +104,7 @@ add_service() {
     # during the install the symlink isn't done so find the right file
     # by ourselves
     if [ -n "$DURING_INSTALL" -a ! -f $LIST ]; then
-	LIST=/etc/security/msec/server.$SECURE_LEVEL
+        LIST=/etc/security/msec/server.$SECURE_LEVEL
     fi
 
     # This is half-hearted support for msec: we check "srv" for a unit
@@ -81,55 +114,187 @@ add_service() {
     # not need to be checked.
     # TODO should msec support full unit name?
     if [ -f $LIST ]; then
-	if [ -n "$srv" ]; then
-	    if fgrep -qx "${srv}" $LIST; then
-		units_to_enable="$units"
-	    else
-		srv=
-	    fi
-	else
-	    for i in $units; do
-		[ $i != ${i%.service} ] && ! fgrep -qx ${i%.service} $LIST && continue
-		units_to_enable="$units_to_enable $i"
-	    done
-	fi
+        if [ -n "$srv" ]; then
+            if fgrep -qx "${srv}" $LIST; then
+                units_to_enable="$units"
+            else
+                srv=
+            fi
+        else
+            for i in $units; do
+                [ $i != ${i%.service} ] && ! fgrep -qx ${i%.service} $LIST && continue
+                [ $i != ${i%.socket} ] && ! fgrep -qx ${i%.socket} $LIST && continue
+                [ $i != ${i%.path} ] && ! fgrep -qx ${i%.path} $LIST && continue
+                units_to_enable="$units_to_enable $i"
+            done
+        fi
     else
-	units_to_enable="$units"
+        units_to_enable="$units"
     fi
 
-    add_chkconfig_service
+    # Actually do enable/disable foo
+    if [ -n "$units_to_enable" ]; then
+        /bin/systemctl --quiet enable $units_to_enable >/dev/null
+    fi
+
+    # When no native systemd unit exists, the above command will actually
+    # just end up running chkconfig anyway, but if a native systemd unit exists
+    # the legacy init script will not be enabled.
+    # In order to enable switching back ot sysvinit, we should enable the
+    # sysvinit scripts too.
+    if [ -n "$srv" -a -f /etc/rc.d/init.d/$srv ]; then
+        /sbin/chkconfig --add $srv
+
+        if [ -r /etc/sysconfig/system ]; then
+            . /etc/sysconfig/system
+        fi
+
+        # TODO what to do with system units here?
+        if [ -z "$ADD_SERVICES_TO_CURRENT_PROFILE_ONLY" ]; then
+            # add the service to all the profiles at once
+            if [ -d /etc/netprofile/profiles/default/services ]; then
+                for dir in /etc/netprofile/profiles/*/services; do
+                    touch $dir/$srv
+                done
+            fi
+        fi
+    fi
 }
 
+check_sysvinit_service() {
+    rl=$1
+    srv=$2
+
+    set -- /etc/rc${rl}.d/S??$srv
+    if [ $# -gt 1 ]; then
+        echo 1>&2 "add-service: Error: $srv appears multiple times at runlevel $rl: $*"
+    fi
+
+    echo -n $1
+}
 if [ $num = 1 ]; then
     # First install mode
-    add_service
+    if [ "null" != "$units" ]; then
+        add_service
+    fi
 else
-    # Upgrade mode. systemd units are restarted in postun
-    [ -n "$srv" ] || exit 0
+    # Upgrade mode.
+    reloaded=no
 
-    # if the service is activated, add it again to be able to handle
-    # changes in start/stop levels. This does not change enabled/disabled
-    # state, so we do not do it for systemd where dependencies are handled
-    # automatically.
+    # Handle migration to systemd.
+    # If a previously installed package only had a sysvinit script, but an
+    # updated package has a native systemd unit, we need to make sure we migrate
+    # any service enablement for various targets (née runlevels)
+    if [ -n "$srv" -a -n "$units" ]; then
+        if [ ! -f "${systemd_migration_dir}/$srv" ]; then
+            full_path_units=
+            for unit in $units; do
+                [ "null" = "$unit" ] && continue
+                # We need a full path for the symlink. Also it's possible
+                # that $unit contains "foo.service" where foo is actually
+                # a sysvinit script and thus we'll not have anything native.
+                # We only consider a "migration" to have taken place when
+                # we genuinely have a native systemd unit.
+                unit=$(find_unit $unit)
+                if [ -n "$unit" ]; then
+                    full_path_units="$full_path_units $unit"
+                fi
+            done
 
-    # Restart only SysV services here only if no additional systemd
-    # units are defined or systemd is not active. Otherwise user is expected
-    # to add postun script that handles systemd units.
+            if [ -n "$full_path_units" ]; then
+                enable_targets=
+                # We have not yet migrated this service
+                # First we check in which runlevels the legacy service is enabled
+                # Only bother checking runlevels 1 3 and 5
+                script=$(check_sysvinit_service 1 $srv)
 
-    set -- /etc/rc3.d/S??$srv
-    if [ $# -gt 1 ]; then
-	echo 1>&2 "add-service: Error: $srv appears multiple times: $*"
+                # NB We only check that the link exists as the old sysvinit
+                # script may have been removed during migration to systemd
+                # native unit.
+                if [ -L "$script" ]; then
+                    enable_targets="$enable_targets rescue.target"
+                fi
+
+                script=$(check_sysvinit_service 3 $srv)
+                if [ -L "$script" ]; then
+                    enable_targets="$enable_targets multi-user.target"
+                else
+                    # As graphical.target includes everything in multi-user.target,
+                    # we only need to check 5 when 3 does NOT give us a result.
+                    script=$(check_sysvinit_service 5 $srv)
+                    if [ -L "$script" ]; then
+                        enable_targets="$enable_targets graphical.target"
+                    fi
+                fi
+
+                if [ -n "$enable_targets" ]; then
+                    for unit in $full_path_units; do
+                        bn_unit="$(basename $unit)"
+                        if grep -qE "^(WantedBy|Alias)=" $unit; then 
+                            if [ x$init = xsystemd -a x$reloaded = xno ]; then
+                                /bin/systemctl --system daemon-reload
+                                reloaded=yes
+                            fi
+                            echo 1>&2 "Migrating sysvinit service '$srv' to systemd native unit '$bn_unit' via systemd install rules."
+                            /bin/systemctl enable $bn_unit
+                        elif [[ "$bn_unit" =~ "@.service" ]]; then
+                            echo 1>&2 "Migrating sysvinit service '$srv' to systemd native template unit '$bn_unit': Failed - no install rules"
+                        else
+                            for enable_target in $enable_targets; do
+                                wantsdir=$USERUNITDIR/${enable_target}.wants
+                                mkdir -p $wantsdir
+                                if [ ! -f $wantsdir/$bn_unit ]; then
+                                    echo 1>&2 "Migrating sysvinit service '$srv' to systemd native unit '$bn_unit' for target '${enable_target}'"
+                                    ln -s $unit $wantsdir/$bn_unit
+                                    reloaded=no
+                                fi
+                            done
+                        fi
+                    done
+                fi
+
+                # It could be that a package is installed but not enabled.
+                # If that is the case, we should still consider it "migrated"
+                # even when we do not enable anything.
+                touch "${systemd_migration_dir}/$srv"
+            elif [ "null" = "$units" ]; then
+                # New package masks the unit be we still consider this a migration
+                echo 1>&2 "Migrating sysvinit service '$srv': Masked under systemd."
+                touch "${systemd_migration_dir}/$srv"
+            fi
+        fi
     fi
 
-    if [ -f "$1" ]; then
-	/sbin/chkconfig --add $srv
-    fi
+    if [ x$init = xsystemd ]; then
+        # Package install may have changed the unit file, so reload the daemon
+        # before trying to restart anything
+        if [ x$reloaded = xno ]; then
+            /bin/systemctl --system daemon-reload
+        fi
+        # There may be template units, so attempt to find all instances and
+        # restart them.
+        for unit in $units; do
+            if [[ "$unit" =~ "@.service" ]]; then
+                instances=$(/bin/systemctl -a --full list-units | grep -E "${unit%@.service}@[^ ]+.service" | awk '{ print $1 }')
+                if [ -n "$instances" ]; then
+                    for iunit in $instances; do
+                        /bin/systemctl --quiet try-restart $iunit
+                    done
+                fi
+            elif [ "null" != "$unit" ]; then
+                /bin/systemctl --quiet try-restart $unit
+            fi
+        done
+    elif [ -f /etc/rc.d/init.d/$srv ]; then
+        script=$(check_sysvinit_service 3 $srv);
+        if [ -f "$script" ]; then
+            /sbin/chkconfig --add $srv
+        fi
 
-    if [ -z "$units" ] || ! /bin/mountpoint -q /sys/fs/cgroup/systemd; then
-	# restart the service if already running
-	if [ -f /var/lock/subsys/$srv ]; then
-	    /sbin/service $srv restart > /dev/null || :
-	fi
+        # restart the service if already running
+        if [ -f /var/lock/subsys/$srv ]; then
+            /sbin/service $srv restart > /dev/null || :
+        fi
     fi
 fi
 

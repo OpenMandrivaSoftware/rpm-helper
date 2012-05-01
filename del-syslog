@@ -14,45 +14,7 @@ EOF
     # don't do anything for upgrade
     exit(0) if $number == 1;
 
-    my $release_file = '/etc/release';
-    open(my $fh, '<', $release_file)
-        or die "can't open $release_file: $!";
-    my $line = <$fh>;
-    $line =~ /^Mandriva Linux release (\d\d\d\d\.\d)/;
-    my $release = $1;
-    close($fh);
-
-    if ($release && version->parse($release) < version->parse("2010.1")) {
-        del_sysklogd_entry($package);
-    } else {
-        del_rsyslog_entry($package);
-    }
-}
-
-sub del_sysklogd_entry {
-    my ($package) = @_;
-
-    my $file = "/etc/syslog.conf";
-
-    my $content;
-    open(my $in, '<', $file)
-        or die "Can't open $file for reading: $!";
-    while (my $line = <$in>) {
-        if ($line =~ /^# BEGIN: Automatically added by $package installation$/) {
-            while ($line = <$in>) {
-                last if $line =~ /^# END$/;
-            }
-        } else {
-            $content .= $line;
-        }
-    }
-
-    open(my $out, '>', $file)
-        or die "Can't open $file for writing: $!";
-    print $out $content;
-    close($out);
-
-    system('service syslog condrestart 2>&1 >/dev/null');
+    del_rsyslog_entry($package);
 }
 
 sub del_rsyslog_entry {

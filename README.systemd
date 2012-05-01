@@ -1,0 +1,8 @@
+This folder is used to track systemd migration.
+
+When you install an updated package that contains a native systemd unit which
+supersedes the legacy sysvinit script, the fact that the service is enabled or
+not must be migrated to the systemd way of doing things.
+
+This folder is simply a place to store a note of which services have been
+migrated, such that the process is not repeated on subsequent package updates.

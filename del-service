@@ -18,8 +18,15 @@ else
 fi
 
 if [ $# -lt 3 ]; then
-    echo "usage: $0 [--no-sysv] <pkg name> <number installed> [<service name>] <unit name> ..." 1>&2
+    echo "usage: $0 [--no-sysv] <pkg name> <number installed> [<service name>] [<unit name> ...]" 1>&2
     exit 1
+fi
+
+# What init system are we currently using?
+if /bin/mountpoint -q /sys/fs/cgroup/systemd; then
+    init=systemd
+else
+    init=sysvinit
 fi
 
 pkg=$1				# name of the package
@@ -32,32 +39,53 @@ else
     shift 2
 fi
 units="$*"			# systemd units
-units_to_remove=
 
+# If only a sysvinit service is given, then deal with a systemd unit of the same
+# name. Specific specs can enable specific unit names as needed but this should
+# catch the most common usage.
+if [ -z "$units" ]; then
+  units="$srv.service"
+
+  # We need to normalise the systemd unit name as the native unit may not have
+  # the same filename (sans it's .service suffix) as sysvinit script.
+  # In this case, symlinks are used to mask the sysvinit file, but for enabling
+  # and disabling units we must use the official name.
+  SYSTEMUNITDIR=/lib/systemd/system
+  USERUNITDIR=/etc/systemd/system
+  RUNTIMEUNITDIR=/run/systemd/system
+
+  searchunit=
+  if [ -f "$SYSTEMUNITDIR/$units" ]; then
+    searchunit=$(/usr/bin/readlink "$SYSTEMUNITDIR/$units")
+  elif [ -f "$USERUNITDIR/$units" ]; then
+    searchunit=$(/usr/bin/readlink "$USERUNITDIR/$units")
+  elif [ -f "$RUNTIMEUNITDIR/$units" ]; then
+    searchunit=$(/usr/bin/readlink "$RUNTIMEUNITDIR/$units")
+  fi
+  if [ -n "$searchunit" ]; then
+    units=$searchunit
+  fi
+fi
 
 if [ $num = 0 ]; then
 
     if [ -z "$DURING_INSTALL" ]; then
-	if [ -n "$units" ]; then
-	    if /bin/mountpoint -q /sys/fs/cgroup/systemd; then
-		/bin/systemctl stop $units
-	    fi
-	elif [ -n "srv" ]; then
-	    /sbin/service $srv stop > /dev/null || :
-	fi
+        if [ x$init = xsystemd ]; then
+            /bin/systemctl stop $units
+        elif [ -n "srv" ]; then
+            /sbin/service $srv stop > /dev/null || :
+        fi
     fi
 
-    [ -n "$units" ] && /bin/systemctl --no-reload --quiet disable $units
+    /bin/systemctl --no-reload --quiet disable $units >/dev/null
     [ -n "$srv" ] && /sbin/chkconfig --del $srv
     
     # Yes - this is very ugly workaround. chkconfig --del does daemon-reload,
     # but initscript is still there, so it remains loaded. Remove file and
     # reload again. Systemd units are supposed to provide postun script
-
-    if [ -n "$srv" -a -z "$units" ] && \
-       /bin/mountpoint -q /sys/fs/cgroup/systemd; then
-	/bin/rm -f /etc/rc.d/init.d/$srv
-	/bin/systemctl daemon-reload
+    if [ -n "$srv" -a -f /etc/rc.d/init.d/$srv -a x$init = xsystemd ]; then
+        /bin/rm -f /etc/rc.d/init.d/$srv
+        /bin/systemctl daemon-reload
     fi
 fi
 

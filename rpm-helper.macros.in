@@ -22,6 +22,10 @@
 %_preun_service() %_del_service_helper %{name} $1 %{*} \
 %{nil}
 
+%_reread_services_helper %_rpm_helper_dir/reread-services
+%_postun_service() %_reread_services_helper %{name} \
+%{nil}
+
 %_add_user_helper %_rpm_helper_dir/add-user
 %_pre_useradd() %_add_user_helper %{name} $1 %{1} %{2} %{3} \
 %{nil}

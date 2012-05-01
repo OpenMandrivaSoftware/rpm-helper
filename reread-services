@@ -1,0 +1,31 @@
+#!/bin/sh
+#---------------------------------------------------------------
+# Project         : Mandriva Linux
+# Module          : rpm-helper
+# File            : reread-services
+# Version         : $Id$
+# Authors         : Colin Guthrie
+# Created On      : Thu Nov  3 10:00:00 2011
+# Purpose         : helper script for rpm scriptlets to ensure
+#                   a service is reread by the init system
+#---------------------------------------------------------------
+
+if [ $# -lt 1 ]; then
+    echo "usage: $0 <pkg name>" 1>&2
+    exit 1
+fi
+
+# What init system are we currently using?
+if /bin/mountpoint -q /sys/fs/cgroup/systemd; then
+    init=systemd
+else
+    init=sysvinit
+fi
+
+pkg=$1				# name of the package
+
+if [ x$init = xsystemd ]; then
+    /bin/systemctl daemon-reload || :
+fi
+
+# reread-services ends here

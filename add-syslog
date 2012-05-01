@@ -44,49 +44,7 @@ EOF
     die "maximum priority '$max' lower than minimum priority '$min'"
         if $min && $max && ($priorities{$max} < $priorities{$min});
 
-    my $release_file = '/etc/release';
-    open(my $fh, '<', $release_file)
-        or die "can't open $release_file: $!";
-    my $line = <$fh>;
-    $line =~ /^Mandriva Linux release (\d\d\d\d\.\d)/;
-    my $release = $1;
-    close($fh);
-
-    # add an entry to default syslog implementation, if installed
-    if ($release && version->parse($release) < version->parse("2010.1")) {
-        add_sysklogd_entry($package, $source, $dest, $facility, $min, $max)
-            if -f '/etc/init.d/syslog';
-    } else {
-        add_rsyslog_entry($package, $source, $dest, $facility, $min, $max)
-            if -f '/etc/init.d/rsyslog';
-    }
-}
-
-sub add_sysklogd_entry {
-    my ($package, $source, $dest, $facility, $min, $max) = @_;
-
-    # ensure source is configured
-    add_new_source($source, '/etc/sysconfig/syslog')
-        if $source ne '/dev/log';
-
-    # compute selector
-    my $selector = get_selector($facility, $min, $max);
-
-    # compute spacing to keep default configuration file formatting
-    my $tabs = length($selector) < 48 ?
-        ((48 - length($selector)) / 8) :
-        1;
-
-    # append entry
-    open(my $out, '>>', '/etc/syslog.conf')
-        or die "Can't open /etc/syslog.conf for appending: $!";
-    print $out "# BEGIN: Automatically added by $package installation\n";
-    print $out "$selector" . ("\t" x $tabs) . "-$dest\n";
-    print $out "# END\n";
-    close($out);
-
-    # relaunch syslog
-    system('service syslog condrestart 2>&1 >/dev/null');
+    add_rsyslog_entry($package, $source, $dest, $facility, $min, $max);
 }
 
 sub add_rsyslog_entry {

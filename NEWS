@@ -1,11 +1,50 @@
+2012-04-29 Colin Guthrie <colin@mageia.org> 0.24.9
+	* fix handling of masked and symlinked unit names
+
+2012-04-03 Colin Guthrie <colin@mageia.org> 0.24.8
+	* always reload systemd unit cache before attempting to restart units
+	* change the order we search systemd unitdirs to match upstream
+        * when migrating sysvinit script to systemd, attempt to deal with
+	  template units gracefully - i.e. forget which runlevels it's
+	  configured for and just enable it
+	* when reloading a template unit, search and fine all instances
+	  of that unit and reload them instead
+
+2012-03-12 Guillaume Rousse <guillomovitch@gmail.com> 0.24.7
+	* drop dead code from add-syslog
+	* fix add-syslog documentation
+
+2012-02-16 Colin Guthrie <colin@mageia.org> 0.24.6
+	* silent enable/disable services
+	* migrate service enabled/disabled status from sysvinit to systemd
+	  on upgrade
+
+2011-11-03 D Morgan <dmorgan@mageia.org> 0.24.5
+	* add support for systemd .path files
+
+2011-11-03 Colin Guthrie <colin@mageia.org> 0.24.4
+	* fix up missing file in the Makefile
+
+2011-11-03 Colin Guthrie <colin@mageia.org> 0.24.3
+	* normalise systemd unit names when created from sysvinit service name
+	  to ensure symlinked units are not used to enable/disable services
+	* add a new helper to reload systemd (reread unit files) on %postun
+
+2011-10-30 Colin Guthrie <colin@mageia.org> 0.24.2
+	* change how systemd units are passed to the helper to synthesise
+	  the name from the sysvinit name.
+	* use the correct init system tool to start/stop services based on
+	  which is running
+	* several code tidyups
+
 2011-03-07 Andrey Borzenkov <arvidjaar@gmail.com> 0.23.7
 	* avoid reloading systemd twice with new chkconfig
 
 2011-01-25 Eugeni Dodonov <eugeni@mandriva.com 0.23.6
-	* Fix typo in del-service which made scriplet fail
+	* fix typo in del-service which made scriplet fail
 
 2011-01-25 Eugeni Dodonov <eugeni@mandriva.com 0.23.5
-	* Fix typo in add-service which made scriplet fail
+	* fix typo in add-service which made scriplet fail
 
 2011-01-25 nanardon <nanardon@mandriva.org> 0.23.4
 	* make add/del-syslog code more generic
@@ -44,7 +83,6 @@
 	  if key file already exists
 
 2008-04-02 Pixel <pixel@mandriva.com> 0.21.4
-
 	* workaround services "disabled" by default getting disabled on
 	  upgrade (#39720)
 

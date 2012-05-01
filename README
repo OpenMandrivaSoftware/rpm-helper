@@ -39,17 +39,16 @@ Add given shell to the list of available system shells.
 %_preun_shelldel <shell>
 Remove given shell from the list of available system shells.
 
-%_post_syslogadd <destination> [-s <source>] [-f <facility>] [-m <min>] [-M <max>]
-Add a syslog entry, with given destination (usually a log file), and returns
-used facility. Support sysklogd and syslog-ng.
+%_post_syslogadd <destination> <facility> [-s <source>] [-m <min>] [-M <max>]
+Add a syslog entry, with given destination (usually a log file) and given
+facility, and returns used facility. Support rsyslog only.
 Optional arguments:
 -s: ensure given source (usually /dev/log) is readable by syslog daemon.
--f: use given facility (otherwise first available local one is used).
 -m: use given minimal priority.
 -M: use given maximal priority.
 
 %_preun_syslogdel
-Delete syslog entry created by previous macro. Support sysklogd and syslog-ng.
+Delete syslog entry created by previous macro. Support rsyslog only.
 
 %_post_webapp
 Handle apache configuration reloading if needed when adding a web application.
