@@ -56,24 +56,18 @@ find_unit() {
     # and disabling units we must use the official name.
 
     searchunit=
-    if [ -e "$USERUNITDIR/$unit" ]; then
-        if [ -L "$USERUNITDIR/$unit" ]; then
-            searchunit=$(/usr/bin/readlink -f "$USERUNITDIR/$unit")
-        else
-            searchunit="$USERUNITDIR/$unit"
-        fi
-    elif [ -e "$RUNTIMEUNITDIR/$unit" ]; then
-        if [ -L "$RUNTIMEUNITDIR/$unit" ]; then
-            searchunit=$(/usr/bin/readlink -f "$RUNTIMEUNITDIR/$unit")
-        else
-            searchunit="$RUNTIMEUNITDIR/$unit"
-        fi
+    if [ -L "$USERUNITDIR/$unit" ]; then
+        searchunit=$(/usr/bin/readlink -m "$USERUNITDIR/$unit")
+    elif [ -e "$USERUNITDIR/$unit" ]; then
+        searchunit="$USERUNITDIR/$unit"
+    elif [ -L "$RUNTIMEUNITDIR/$unit" ]; then
+        searchunit=$(/usr/bin/readlink -m "$RUNTIMEUNITDIR/$unit")
+    else [ -e "$RUNTIMEUNITDIR/$unit" ]; then
+        searchunit="$RUNTIMEUNITDIR/$unit"
+    elif [ -L "$SYSTEMUNITDIR/$unit" ]; then
+        searchunit=$(/usr/bin/readlink -m "$SYSTEMUNITDIR/$unit")
     elif [ -e "$SYSTEMUNITDIR/$unit" ]; then
-        if [ -L "$SYSTEMUNITDIR/$unit" ]; then
-            searchunit=$(/usr/bin/readlink -f "$SYSTEMUNITDIR/$unit")
-        else
-            searchunit="$SYSTEMUNITDIR/$unit"
-        fi
+        searchunit="$SYSTEMUNITDIR/$unit"
     fi
     if [ -n "$searchunit" ]; then
         echo -n $searchunit

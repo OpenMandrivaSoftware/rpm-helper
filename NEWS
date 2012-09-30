@@ -8,6 +8,7 @@
 	* prefer native systemd install rules over manual symlinking
 	* mark a systemd-only service as "migrated" on install to avoid checking for
 	  sysvinit migration when next upgraded.
+	* deal slightly better with non-releative symlinks in chroots in units names
 
 2012-04-29 Colin Guthrie <colin@mageia.org> 0.24.9
 	* fix handling of masked and symlinked unit names
