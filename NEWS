@@ -22,6 +22,7 @@
 2012-03-12 Guillaume Rousse <guillomovitch@gmail.com> 0.24.7
 	* drop dead code from add-syslog
 	* fix add-syslog documentation
+	* silence errors when removing packages that have no sysvinit script
 
 2012-02-16 Colin Guthrie <colin@mageia.org> 0.24.6
 	* silent enable/disable services
