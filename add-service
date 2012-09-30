@@ -135,6 +135,9 @@ add_service() {
     # Actually do enable/disable foo
     if [ -n "$units_to_enable" ]; then
         /bin/systemctl --quiet enable $units_to_enable >/dev/null
+        if [ -n "$srv" -a ! -f "${systemd_migration_dir}/$srv" ]; then
+            touch "${systemd_migration_dir}/$srv"
+        fi
     fi
 
     # When no native systemd unit exists, the above command will actually
