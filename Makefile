@@ -57,8 +57,7 @@ localcopy:
 	tar c $(FILES) | tar x -C $(PACKAGE)-$(VERSION)
 
 tar:
-	tar cvf $(PACKAGE)-$(VERSION).tar $(PACKAGE)-$(VERSION)
-	bzip2 -9vf $(PACKAGE)-$(VERSION).tar
+	tar cavf $(PACKAGE)-$(VERSION).tar.xz $(PACKAGE)-$(VERSION)
 	rm -rf $(PACKAGE)-$(VERSION)
 
 # rules to build a public distribution
