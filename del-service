@@ -78,7 +78,7 @@ if [ $num = 0 ]; then
     fi
 
     /bin/systemctl --no-reload --quiet disable $units >/dev/null
-    [ -n "$srv" ] && /sbin/chkconfig --del $srv
+    [ -n "$srv" -a -f /etc/rc.d/init.d/$srv ] && /sbin/chkconfig --del $srv
     
     # Yes - this is very ugly workaround. chkconfig --del does daemon-reload,
     # but initscript is still there, so it remains loaded. Remove file and
