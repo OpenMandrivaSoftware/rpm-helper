@@ -62,7 +62,7 @@ find_unit() {
         searchunit="$USERUNITDIR/$unit"
     elif [ -L "$RUNTIMEUNITDIR/$unit" ]; then
         searchunit=$(/usr/bin/readlink -m "$RUNTIMEUNITDIR/$unit")
-    else [ -e "$RUNTIMEUNITDIR/$unit" ]; then
+    elif [ -e "$RUNTIMEUNITDIR/$unit" ]; then
         searchunit="$RUNTIMEUNITDIR/$unit"
     elif [ -L "$SYSTEMUNITDIR/$unit" ]; then
         searchunit=$(/usr/bin/readlink -m "$SYSTEMUNITDIR/$unit")
