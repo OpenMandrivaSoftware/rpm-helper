@@ -40,30 +40,46 @@ else
 fi
 units="$*"			# systemd units
 
+USERUNITDIR=/etc/systemd/system
+RUNTIMEUNITDIR=/run/systemd/system
+SYSTEMUNITDIR=/lib/systemd/system
+
+find_unit() {
+    unit=$(basename $1)
+
+    # We need to normalise the systemd unit name as the native unit may not have
+    # the same filename (sans it's .service suffix) as sysvinit script.
+    # In this case, symlinks are used to mask the sysvinit file, but for enabling
+    # and disabling units we must use the official name.
+
+    searchunit=
+    if [ -L "$USERUNITDIR/$unit" ]; then
+        searchunit=$(/usr/bin/readlink -m "$USERUNITDIR/$unit")
+    elif [ -e "$USERUNITDIR/$unit" ]; then
+        searchunit="$USERUNITDIR/$unit"
+    elif [ -L "$RUNTIMEUNITDIR/$unit" ]; then
+        searchunit=$(/usr/bin/readlink -m "$RUNTIMEUNITDIR/$unit")
+    else [ -e "$RUNTIMEUNITDIR/$unit" ]; then
+        searchunit="$RUNTIMEUNITDIR/$unit"
+    elif [ -L "$SYSTEMUNITDIR/$unit" ]; then
+        searchunit=$(/usr/bin/readlink -m "$SYSTEMUNITDIR/$unit")
+    elif [ -e "$SYSTEMUNITDIR/$unit" ]; then
+        searchunit="$SYSTEMUNITDIR/$unit"
+    fi
+    if [ -n "$searchunit" ]; then
+        echo -n $searchunit
+    fi
+}
+
+
 # If only a sysvinit service is given, then deal with a systemd unit of the same
 # name. Specific specs can enable specific unit names as needed but this should
 # catch the most common usage.
 if [ -z "$units" ]; then
   units="$srv.service"
-
-  # We need to normalise the systemd unit name as the native unit may not have
-  # the same filename (sans it's .service suffix) as sysvinit script.
-  # In this case, symlinks are used to mask the sysvinit file, but for enabling
-  # and disabling units we must use the official name.
-  SYSTEMUNITDIR=/lib/systemd/system
-  USERUNITDIR=/etc/systemd/system
-  RUNTIMEUNITDIR=/run/systemd/system
-
-  searchunit=
-  if [ -f "$SYSTEMUNITDIR/$units" ]; then
-    searchunit=$(/usr/bin/readlink "$SYSTEMUNITDIR/$units")
-  elif [ -f "$USERUNITDIR/$units" ]; then
-    searchunit=$(/usr/bin/readlink "$USERUNITDIR/$units")
-  elif [ -f "$RUNTIMEUNITDIR/$units" ]; then
-    searchunit=$(/usr/bin/readlink "$RUNTIMEUNITDIR/$units")
-  fi
+  searchunit=$(find_unit $units)
   if [ -n "$searchunit" ]; then
-    units=$searchunit
+    units=$(basename $searchunit)
   fi
 fi
 
