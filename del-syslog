@@ -1,40 +1,46 @@
-#!/usr/bin/perl
+#!/bin/sh
 # rpm helper scriptlet to remove a syslog entry (sysklogd and syslog-ng)
 # $Id$
-use strict;
 
-main(@ARGV) unless caller();
 
-sub main {
-    die <<EOF if @ARGV < 2;
-usage: $0 <pkg> <nb>
-EOF
-    my ($package, $number) = @ARGV;
+del_rsyslog_entry() {
+    package=$1
 
-    # don't do anything for upgrade
-    exit(0) if $number == 1;
-
-    del_rsyslog_entry($package);
-}
-
-sub del_rsyslog_entry {
-    my ($package) = @_;
-
-    my $file = "/etc/rsyslog.d/$package.conf";
+    file="/etc/rsyslog.d/$package.conf";
 
     # check the file exists
-    return unless -f $file;
+    if [ ! -f $file ]; then
+        return
+    fi
 
     # check the file is the one created by package installation
-    open(my $in, '<', $file)
-        or die "Can't open $file for reading: $!";
-    my $line = <$in>;
-    close($in);
-    return if $line ne "# Automatically added by $package installation\n";
+    line=$(head -1 $file)
+    
+    echo $line
+    if [ "$line" != "# Automatically added by $package installation" ]; then
+      return
+    fi
 
-    unlink $file
-        or die "Can't delete $file: $!";
-    system('service rsyslog condrestart 2>&1 >/dev/null');
+    /bin/rm -f $file
+
+    service rsyslog condrestart 2>&1 >/dev/null;
 }
 
-1;
+
+if [ $# -lt 2 ]; then
+    echo "usage: $0 <pkg> <nb>"
+    exit 1
+fi
+
+package=$1
+number=$2
+
+# don't do anything for upgrade
+if [ $number -eq 1 ]; then
+   exit 0
+fi
+
+del_rsyslog_entry $package
+
+
+

@@ -1,130 +1,200 @@
-#!/usr/bin/perl
+#!/bin/sh
 # rpm helper scriptlet to add an entry into default syslog implementation
 # $Id$
-use Getopt::Std;
-use strict;
 
-my @facilities = qw/auth authpriv cron daemon \
-                    kern lpr mail mark news syslog \
-                    user uucp local0 local1 local2 \
-                    local3 local4 local5 local6 local7/;
-my %facilities = map { $_ => 1 } @facilities;
-my @priorities = qw/debug info notice warning err crit alert emerg/;
-my $i;
-my %priorities = map { $_ => $i++ } @priorities;
+item_in_list() {
+   list=$1
+   search_item=$2
+   found=0
 
-main(@ARGV) unless caller();
+   for item in $list; do
+      if [ $item = $search_item ]; then
+         echo $found
+         return
+      fi
+      found=$(($found + 1))
+   done
 
-sub main {
-    my %opts = ( 
-        s => '/dev/log',
-        m => 'debug',
-        M => 'emerg'
-    );
-    getopts('s:m:M:', \%opts);
-    my ($source, $min, $max) = @opts{qw/s m M/};
+   echo "-1"
+}
 
-    die <<EOF if @ARGV < 4;
+add_rsyslog_entry() {
+
+    package=$1
+    source=$2
+    dest=$3
+    facility=$4
+    min=$5
+    max=$6
+
+    # compute selector
+    selector=$( get_selector $facility $min $max )
+
+    # append entry
+    out="/etc/rsyslog.d/$package.conf"
+
+    echo "# Automatically added by $package installation" > $out
+
+    if [ ! -f $out ]; then
+        echo "Can't open /etc/rsyslog.d/$package.conf for writing."
+        exit 1
+    fi
+
+    if [ $source != '/dev/log' ]; then
+      echo "\$AddUnixListenSocket $source" >> $out;
+    fi
+    echo "$selector	-$dest" >> $out;
+
+    # relaunch rsyslog
+    service rsyslog condrestart 2>&1 >/dev/null
+}
+
+add_new_source() {
+    source=$1
+    file=$2
+
+    changed=0
+    content=""
+
+    if [ !-f "$file" ]; then
+        echo "Can't open $file for reading"
+        exit 1
+    fi
+
+    while read LINE
+    do
+        if [ $line =~ /^SYSLOGD_OPTIONS=\(.*\)/ ]; then
+            options=$1
+            if [ ! -z $options ]; then
+               if [ $options !~ /-a\s+$source/ ]; then
+                   if [ $options =~ /^\([\"\']\)\(.*\)\1$/ ]; then
+                       quote = $1
+                       options = $2
+                   else
+                       quote = '"'
+                   fi
+               fi
+            else
+               options="\"-a $source\""
+               changed=1
+            fi
+            content="${content}SYSLOGD_OPTIONS=$options\n"
+        else
+            content="${content}$line"
+        fi
+    done < $file
+
+    if [ $changed -eq 1 ]; then
+        echo $content > $out
+    fi
+}
+
+get_selector() {
+    facility=$1
+    min=$2
+    max=$3
+    progress=0
+
+    if [ "$max" = 'emerg' ]; then
+        if [ "$min" = 'debug' ]; then
+            selector="$facility.*"
+        else 
+            selector="$facility.$min"
+        fi
+    else
+        for item in $PRIORITIES; do
+            if [ "$item" = "$min" ]; then
+              progress=1
+            fi
+
+            if [ ! -z "$selector" ]; then
+              selector="$selector;"
+            fi
+
+            if [ "$progress" -eq "1" ]; then
+              selector="$selector$facility.=$item"
+            fi
+            
+            if [ "$item" = "$max" ]; then
+              progress=0
+            fi
+        done
+    fi
+
+    echo $selector;
+}
+
+
+FACILITIES="auth authpriv cron daemon kern lpr mail mark news syslog user uucp local0 local1 local2 local3 local4 local5 local6 local"
+PRIORITIES="debug info notice warning err crit aler emerg"
+
+
+source=/dev/log
+min=debug
+max=emerg
+
+while [ "$1" != "${1##[-=]}" ]; do
+  case $1 in 
+    '-s')
+         source=$2
+         shift 2
+         ;;
+    '-m')
+         min=$2
+         shift 2
+         ;;
+    '-M')
+         max=$2
+         shift 2
+         ;;
+  esac
+done
+
+if [ $# -lt 4 ]; then
+    echo "
 usage: $0 [options] <pkg> <nb> <facility> <dest>
 Available options:
 -s <source>   source (default: /dev/log)
 -m <priority> min priority (default: debug)
 -M <priority> max priority (default: emerg)
-EOF
-    my ($package, $number, $dest, $facility) = @ARGV;
+"
+    exit 1
+fi
+
+package=$1
+number=$2
+facility=$3
+dest=$4
 
     # don't do anything for upgrade
-    exit(0) if $number == 2;
+if [ $number -eq 2 ]; then
+  exit 0
+fi
 
-    # check arguments
-    die "invalid facility '$facility'" if $facility && !$facilities{$facility};
+# check arguments
+found_facility=$(item_in_list "$FACILITIES" $facility)
+if [ ! -z "$facility" ] && [ "$found_facility" == "-1" ]; then
+   echo "invalid facility '$facility'"
+   exit 1
+fi
 
-    die "invalid min priority '$min'" if $min && ! defined $priorities{$min};
-    die "invalid max priority '$max'" if $max && ! defined $priorities{$max};
-    die "maximum priority '$max' lower than minimum priority '$min'"
-        if $min && $max && ($priorities{$max} < $priorities{$min});
+min_occurrence=$(item_in_list "$PRIORITIES" $min)
+echo "Min: $min_occurrence"
+if [ ! -z "$min" ] && [ "$min_occurrence" == "-1" ]; then
+   echo "invalid min priority '$min'"
+   exit 1
+fi
 
-    add_rsyslog_entry($package, $source, $dest, $facility, $min, $max);
-}
+max_occurrence=$(item_in_list "$PRIORITIES" $max )
+echo "Max: $max_occurrence"
+if [ ! -z "$max" ] && [ "$max_occurrence" == "-1" ]; then
+   echo "invalid max priority '$max'"
+   exit 1
+fi
 
-sub add_rsyslog_entry {
-    my ($package, $source, $dest, $facility, $min, $max) = @_;
+if [ "$min_occurrence" != "-1" ] && [ "$max_occurrence" != "-1" ] && (( "$max_occurrence" < "$min_occurrence" )); then
+   echo "maximum priority '$max' lower than minimum priority '$min'"
+   exit 1
+fi
 
-    # compute selector
-    my $selector = get_selector($facility, $min, $max);
-
-    # append entry
-    open(my $out, '>', "/etc/rsyslog.d/$package.conf")
-        or die "Can't open /etc/rsyslog.d/$package.conf for writing: $!";
-    print $out "# Automatically added by $package installation\n";
-    print $out "\$AddUnixListenSocket $source\n" if $source ne '/dev/log';
-    print $out "$selector\t-$dest\n";
-    close($out);
-
-    # relaunch rsyslog
-    system('service rsyslog condrestart 2>&1 >/dev/null');
-}
-
-sub add_new_source {
-    my ($source, $file) = @_;
-
-    my ($content, $changed);
-    open(my $in, '<', $file)
-        or die "Can't open $file for reading: $!";
-
-    while (my $line = <$in>) {
-        if ($line =~ /^SYSLOGD_OPTIONS=(.*)/) {
-            my $options = $1;
-            if ($options) {
-                my $quote;
-                if ($options !~ /-a\s+$source/) {
-                    if ($options =~ /^(["'])(.*)\1$/) {
-                        $quote = $1;
-                        $options = $2;
-                    } else {
-                        $quote = '"';
-                    }
-                    $options = $quote . $options . " -a $source" . $quote;
-                    $changed = 1;
-                }
-            } else {
-                $options = "\"-a $source\"";
-                $changed = 1;
-            }
-
-            $content .= "SYSLOGD_OPTIONS=$options\n";
-        } else {
-            $content .= $line;
-        }
-    }
-    close($in);
-
-    if ($changed) {
-        open(my $out, '>', $file)
-            or die "Can't open $file for writing: $!";
-        print $out $content;
-        close($out);
-    }
-}
-
-sub get_selector {
-    my ($facility, $min, $max) = @_;
-
-    my $selector;
-    if ($max eq 'emerg') {
-        if ($min eq 'debug') {
-            $selector = "$facility.*";
-        } else {
-            $selector = "$facility.$min";
-        }
-    } else {
-        for my $i ($priorities{$min} .. $priorities{$max}) {
-            $selector .= ';' if $selector;
-            $selector .= "$facility.=$priorities[$i]";
-        }
-    }
-
-    return $selector;
-}
-
-1;
+add_rsyslog_entry $package  $source $dest $facility $min $max;
