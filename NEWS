@@ -1,3 +1,7 @@
+2013-01-08 Per Øyvind Karlsen <peroytvind@mandriva.org> 0.24.12
+	* rewrite add-syslog & del-syslog in shell script, eliminating
+	  remaining perl dependencies (Crispin Boylan)
+
 2012-09-30 Colin Guthrie <colin@mageia.org> 0.24.11
 	* mark a systemd-only service as "migrated" on install to avoid checking for
 	  sysvinit migration when next upgraded.

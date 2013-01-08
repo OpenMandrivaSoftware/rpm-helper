@@ -1,5 +1,5 @@
 PACKAGE = rpm-helper
-VERSION = 0.24.11
+VERSION = 0.24.12
 SVNPATH = svn+ssh://svn.mageia.org/svn/soft/rpm/$(PACKAGE)
 
 SCRIPT_FILES = add-user del-user create-file \
