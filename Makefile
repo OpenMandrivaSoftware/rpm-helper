@@ -1,6 +1,5 @@
 PACKAGE = rpm-helper
 VERSION = 0.24.12
-SVNPATH = svn+ssh://svn.mageia.org/svn/soft/rpm/$(PACKAGE)
 
 SCRIPT_FILES = add-user del-user create-file \
 	       add-service del-service reread-services \
@@ -62,7 +61,4 @@ tar:
 
 # rules to build a public distribution
 
-dist: cleandist dir localcopy tar svntag
-
-svntag:
-	svn cp -m 'version $(VERSION)' $(SVNPATH)/trunk $(SVNPATH)/tags/v$(VERSION)
+dist: cleandist dir localcopy tar
