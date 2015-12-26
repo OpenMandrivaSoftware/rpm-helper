@@ -22,7 +22,7 @@ fi
 if [ ! -f /etc/pki/tls/private/$srv.pem ]; then 
     # default values
     host=$(hostname)
-    KEY_LENGTH=1024
+    KEY_LENGTH=2048
     CERT_DAYS=365
     EMAIL_ADDRESS=root@$host
     COMMON_NAME=$host

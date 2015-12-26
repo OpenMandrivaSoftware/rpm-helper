@@ -1,12 +1,11 @@
 PACKAGE = rpm-helper
-VERSION = 0.24.12
+VERSION = 0.24.17
 
 SCRIPT_FILES = add-user del-user create-file \
 	       add-service del-service reread-services \
 	       add-group del-group add-shell del-shell verify-shell \
 	       add-syslog del-syslog add-webapp del-webapp \
-	       get-password create-ssl-certificate \
-	       migrate-service postun-unit
+	       get-password create-ssl-certificate
 MACROS_FILES = rpm-helper.macros
 CONF_FILES   = ssl
 TEST_FILES   = t/*.t
@@ -47,7 +46,7 @@ test:
 localdist: cleandist dir localcopy tar
 
 cleandist: clean
-	rm -rf $(PACKAGE)-$(VERSION) $(PACKAGE)-$(VERSION).tar.bz2
+	rm -rf $(PACKAGE)-$(VERSION) $(PACKAGE)-$(VERSION).tar.xz
 
 dir:
 	mkdir $(PACKAGE)-$(VERSION)
@@ -61,4 +60,7 @@ tar:
 
 # rules to build a public distribution
 
-dist: cleandist dir localcopy tar
+dist: cleandist dir localcopy tar gittag
+
+gittag:
+	git tag -f v$(VERSION)

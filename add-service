@@ -78,7 +78,7 @@ find_unit() {
 # If only a sysvinit service is given, then deal with a systemd unit of the same
 # name. Specific specs can enable specific unit names as needed but this should
 # catch the most common usage.
-if [ -z "$units" ]; then
+if [ -z "$units" -a -n "$srv" -a ! -f /etc/xinetd.d/$srv ]; then
   units="$srv.service"
   searchunit=$(find_unit $units)
   if [ -n "$searchunit" ]; then
@@ -91,7 +91,7 @@ add_service() {
     if [ -r /etc/sysconfig/msec ]; then
         . /etc/sysconfig/msec
     fi
-    
+
     # High security: add only authorized services
     LIST=/etc/security/msec/server
 
@@ -114,7 +114,7 @@ add_service() {
             else
                 srv=
             fi
-        else
+        elif [ -n "$units" ]; then
             for i in $units; do
                 [ $i != ${i%.service} ] && ! fgrep -qx ${i%.service} $LIST && continue
                 [ $i != ${i%.socket} ] && ! fgrep -qx ${i%.socket} $LIST && continue
@@ -128,7 +128,13 @@ add_service() {
 
     # Actually do enable/disable foo
     if [ -n "$units_to_enable" ]; then
-        /bin/systemctl --quiet enable $units_to_enable >/dev/null
+        # Prefer preset (for native systemd units), but fall back to enable (for sysvinit units)
+        /bin/systemctl --quiet preset $units_to_enable >/dev/null 2>&1 || /bin/systemctl --quiet enable $units_to_enable >/dev/null 2>&1
+        if [ $? -ne 0 ]; then
+          echo "Warning: Problems encountered when activating services." >&2
+          echo "  Please check and enable manually if necessary." >&2
+          echo "  Service units affected: $units_to_enable" >&2
+        fi
         if [ -n "$srv" -a ! -f "${systemd_migration_dir}/$srv" ]; then
             touch "${systemd_migration_dir}/$srv"
         fi
@@ -139,7 +145,8 @@ add_service() {
     # the legacy init script will not be enabled.
     # In order to enable switching back ot sysvinit, we should enable the
     # sysvinit scripts too.
-    if [ -n "$srv" -a -f /etc/rc.d/init.d/$srv ]; then
+    if [ -n "$srv" ]; then
+      if [ -f /etc/rc.d/init.d/$srv -o -f /etc/xinetd.d/$srv ]; then
         /sbin/chkconfig --add $srv
 
         if [ -r /etc/sysconfig/system ]; then
@@ -155,6 +162,7 @@ add_service() {
                 done
             fi
         fi
+      fi
     fi
 }
 

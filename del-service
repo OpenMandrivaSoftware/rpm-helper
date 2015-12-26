@@ -87,21 +87,17 @@ if [ $num = 0 ]; then
 
     if [ -z "$DURING_INSTALL" ]; then
         if [ x$init = xsystemd ]; then
-            /bin/systemctl stop $units
-        elif [ -n "srv" ]; then
+            /bin/systemctl stop $units >/dev/null 2>&1
+        elif [ -n "$srv" ]; then
             /sbin/service $srv stop > /dev/null || :
         fi
     fi
 
-    /bin/systemctl --no-reload --quiet disable $units >/dev/null
-    [ -n "$srv" -a -f /etc/rc.d/init.d/$srv ] && /sbin/chkconfig --del $srv
-    
-    # Yes - this is very ugly workaround. chkconfig --del does daemon-reload,
-    # but initscript is still there, so it remains loaded. Remove file and
-    # reload again. Systemd units are supposed to provide postun script
-    if [ -n "$srv" -a -f /etc/rc.d/init.d/$srv -a x$init = xsystemd ]; then
-        /bin/rm -f /etc/rc.d/init.d/$srv
-        /bin/systemctl daemon-reload
+    /bin/systemctl --no-reload --quiet disable $units >/dev/null 2>&1
+    if [ -n "$srv" ]; then
+	if [ -f /etc/rc.d/init.d/$srv -o -f /etc/xinetd.d/$srv ]; then
+	    /sbin/chkconfig --del $srv
+	fi
     fi
 fi
 

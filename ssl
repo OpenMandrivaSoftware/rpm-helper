@@ -1,7 +1,7 @@
 # configuration file for create-ssl-certificate rpm scriptlet
 
 # key length
-KEY_LENGTH=1024
+KEY_LENGTH=2048
 
 # certificate duration
 CERT_DAYS=365

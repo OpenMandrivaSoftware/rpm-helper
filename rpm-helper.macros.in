@@ -70,18 +70,8 @@
 %{nil}
 
 # systemd support
-%_migrate_service_helper %_rpm_helper_dir/migrate-service
-%_systemd_migrate_service_pre() %_migrate_service_helper pre %{*} \
-%{nil}
-%_systemd_migrate_service_post() %_migrate_service_helper post %{*} \
-%{nil}
-
 %_post_unit() %_add_service_helper --no-sysv %{name} $1 %{*} \
 %{nil}
 
 %_preun_unit() %_del_service_helper --no-sysv %{name} $1 %{*} \
-%{nil}
-
-%_postun_unit_helper %_rpm_helper_dir/postun-unit
-%_postun_unit() %_postun_unit_helper %{name} $1 %{*} \
 %{nil}

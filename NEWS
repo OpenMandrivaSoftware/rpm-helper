@@ -1,4 +1,21 @@
-2013-01-08 Per Øyvind Karlsen <peroytvind@mandriva.org> 0.24.12
+2014-10-27 Colin Guthrie <colin@mageia.org> 0.24.15
+	* don't leak failure exit code when no sysvinit script exists
+	* be quieter when disabling services on uninstall too
+
+2014-10-09 Colin Guthrie <colin@mageia.org> 0.24.14
+	* be quieter when enabling services, but tell the user when it goes wrong
+
+2014-10-08 Colin Guthrie <colin@mageia.org> 0.24.13
+	* use systemctl enable if preset fails (which it will for sysvinit)
+	* use systemctl preset rather than enable to respect preset configuration
+	* drop hacky workaround for systemd reload on sysv initscript package removal
+	  as a filetrigger with appropriate matching will suffice fine here
+	* drop systemd migration scripts we never used
+
+2013-08-28 Per Øyvind Karlsen <proyvind@moondrake.net> 0.24.13
+	* fix sysv check in del-service
+
+2013-01-08 Per Øyvind Karlsen <peroyvind@mandriva.org> 0.24.12
 	* rewrite add-syslog & del-syslog in shell script, eliminating
 	  remaining perl dependencies (Crispin Boylan)
 
