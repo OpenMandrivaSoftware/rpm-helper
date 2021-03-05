@@ -14,12 +14,12 @@ pkg=${args[0]}	# name of the package
 num=${args[1]}	# number of packages installed
 srv=${args[2]}	# name of the service
 
-if [ -z "$pkg" -o -z "$num" -o -z "$srv" ]; then
+if [ -z "$pkg" ] || [ -z "$num" ] || [ -z "$srv" ]; then
     echo "usage: $0 [-g <group>] [-b] <pkg name> <num installed> <service>" 1>&2
     exit 1
 fi
 
-if [ ! -f /etc/pki/tls/private/$srv.pem ]; then 
+if [ ! -f "/etc/pki/tls/private/$srv.pem" ]; then
     # default values
     host=$(hostname)
     KEY_LENGTH=2048
@@ -35,7 +35,7 @@ if [ ! -f /etc/pki/tls/private/$srv.pem ]; then
 
     conffile=/tmp/$$
     keyfile=/etc/pki/tls/private/$srv.pem
-    if [ "$bundle" == true ]; then
+    if [ "$bundle" = "true" ]; then
 	certfile=$keyfile
     else
 	certfile=/etc/pki/tls/certs/$srv.pem
@@ -59,16 +59,16 @@ basicConstraints        = CA:FALSE
 EOF
     
     # generate certificates
-    openssl req -new -x509 -days $CERT_DAYS \
-        -config $conffile \
-        -keyout $keyfile \
-        -out $certfile >/dev/null
+    openssl req -new -x509 -days" $CERT_DAYS" \
+        -config "$conffile" \
+        -keyout "$keyfile" \
+        -out "$certfile" >/dev/null
 
     # enforce strict perms on key
     if [ -n "$group" ]; then
-	chmod 640 $keyfile
-	chgrp $group $keyfile
+	chmod 640 "$keyfile"
+	chgrp "$group" "$keyfile"
     else
-	chmod 600 $keyfile
+	chmod 600 "$keyfile"
     fi
 fi

@@ -1,6 +1,6 @@
 #!/bin/sh
 #---------------------------------------------------------------
-# Project         : Mandriva Linux
+# Project         : OpenMandriva Lx
 # Module          : rpm-helper
 # File            : add-group
 # Version         : $Id$
@@ -20,8 +20,8 @@ num=$2				# number of packages installed
 name=$3				# name of the group
 users=$4			# users to add to this group
 
-if ! getent group $name > /dev/null 2>&1; then
-    /usr/sbin/groupadd -r $name > /dev/null
+if ! getent group "$name" > /dev/null 2>&1; then
+    /usr/sbin/groupadd -r "$name" > /dev/null
 
     if [ -n "$users" ]; then
 	SAVED_IFS="$IFS"
@@ -30,11 +30,11 @@ if ! getent group $name > /dev/null 2>&1; then
 	IFS="$SAVED_IFS"
 
 	for u in $*; do
-	    old=`egrep "[:,]$u(,|$)" /etc/group | cut -d : -f 1 | xargs echo`
+	    old=$(egrep "[:,]$u(,|$)" /etc/group | cut -d : -f 1 | xargs echo)
 	    if [ -n "$old" ]; then
-		old=`echo ",$old" | sed 's/ /,/g'`
+		old=$(echo ",$old" | sed 's/ /,/g')
 	    fi
-	    /usr/sbin/usermod -G $name$old $u > /dev/null
+	    /usr/sbin/usermod -G "$name$old" "$u" > /dev/null
 	done
     fi
 fi

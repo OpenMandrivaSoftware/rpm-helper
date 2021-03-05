@@ -1,5 +1,5 @@
 PACKAGE = rpm-helper
-VERSION = 0.24.17
+VERSION = 0.24.18
 
 SCRIPT_FILES = add-user del-user create-file \
 	       add-service del-service reread-services \

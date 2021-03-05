@@ -1,6 +1,6 @@
 #!/bin/sh
 #---------------------------------------------------------------
-# Project         : Mandriva Linux
+# Project         : OpenMandriva Lx
 # Module          : rpm-helper
 # File            : del-service
 # Version         : $Id$
@@ -10,7 +10,7 @@
 #		    service.
 #---------------------------------------------------------------
 
-if [ x$1 = x--no-sysv ]; then
+if [ x"$1" = x--no-sysv ]; then
     do_sysv=no
     shift
 else
@@ -23,7 +23,7 @@ if [ $# -lt 3 ]; then
 fi
 
 # What init system are we currently using?
-if /bin/mountpoint -q /sys/fs/cgroup/systemd; then
+if [ -d /run/systemd/system/ ]; then
     init=systemd
 else
     init=sysvinit
@@ -45,7 +45,7 @@ RUNTIMEUNITDIR=/run/systemd/system
 SYSTEMUNITDIR=/lib/systemd/system
 
 find_unit() {
-    unit=$(basename $1)
+    unit=$(basename "$1")
 
     # We need to normalise the systemd unit name as the native unit may not have
     # the same filename (sans it's .service suffix) as sysvinit script.
@@ -67,7 +67,7 @@ find_unit() {
         searchunit="$SYSTEMUNITDIR/$unit"
     fi
     if [ -n "$searchunit" ]; then
-        echo -n $searchunit
+        echo -n "$searchunit"
     fi
 }
 
@@ -77,13 +77,13 @@ find_unit() {
 # catch the most common usage.
 if [ -z "$units" ]; then
   units="$srv.service"
-  searchunit=$(find_unit $units)
+  searchunit=$(find_unit "$units")
   if [ -n "$searchunit" ]; then
-    units=$(basename $searchunit)
+    units=$(basename "$searchunit")
   fi
 fi
 
-if [ $num = 0 ]; then
+if [ "$num" = 0 ]; then
 
     if [ -z "$DURING_INSTALL" ]; then
         if [ x$init = xsystemd ]; then
@@ -95,7 +95,7 @@ if [ $num = 0 ]; then
 
     /bin/systemctl --no-reload --quiet disable $units >/dev/null 2>&1
     if [ -n "$srv" ]; then
-	if [ -f /etc/rc.d/init.d/$srv -o -f /etc/xinetd.d/$srv ]; then
+	if [ -f /etc/rc.d/init.d/$srv ] || [ -f /etc/xinetd.d/$srv ]; then
 	    /sbin/chkconfig --del $srv
 	fi
     fi

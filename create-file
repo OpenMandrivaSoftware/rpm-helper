@@ -1,6 +1,6 @@
 #!/bin/sh
 #---------------------------------------------------------------
-# Project         : Mandriva Linux
+# Project         : OpenMandriva Lx
 # Module          : rpm-helper
 # File            : create-file
 # Version         : $Id$
@@ -22,10 +22,10 @@ owner=$4			# owner of the file
 group=$5			# group of the file
 mode=$6				# mode of the file
 
-if [ ! -f $file ]; then
-  touch $file
-  chown $owner:$group $file
-  chmod $mode $file
+if [ ! -f "$file" ]; then
+  touch "$file"
+  chown "$owner:$group" "$file"
+  chmod "$mode" "$file"
 fi
 
 # create-file ends here

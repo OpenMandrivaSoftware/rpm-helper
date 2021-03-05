@@ -8,7 +8,7 @@ fi
 pkg=$1	# name of the package
 num=$2	# number of packages installed
 
-if [ $num = 0 ]; then
+if [ "$num" = 0 ]; then
     # in simultaneous removal scenario, web server may 
     # already have been removed
     if [ -f /etc/init.d/httpd ]; then
