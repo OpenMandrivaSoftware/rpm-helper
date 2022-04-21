@@ -59,7 +59,7 @@ basicConstraints        = CA:FALSE
 EOF
     
     # generate certificates
-    openssl req -new -x509 -days" $CERT_DAYS" \
+    openssl req -new -x509 -days "$CERT_DAYS" \
         -config "$conffile" \
         -keyout "$keyfile" \
         -out "$certfile" >/dev/null
