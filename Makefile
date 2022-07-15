@@ -15,7 +15,7 @@ FILES        = AUTHORS README COPYING NEWS Makefile \
 	       $(TEST_FILES) $(SYSTEMDMIGRATION_FILES)
 
 pkgdatadir   = /usr/share/$(PACKAGE)
-rpmmacrosdir = /etc/rpm/macros.d
+rpmmacrosdir = /usr/lib/rpm/macros.d
 sysconfigdir = /etc/sysconfig
 systemdmigrationdir = /var/lib/rpm-helper/systemd-migration
 
@@ -26,7 +26,7 @@ install: $(MACROS_FILES)
 	install -d -m 755 $(DESTDIR)$(pkgdatadir)
 	cp -p $(SCRIPT_FILES) $(DESTDIR)$(pkgdatadir)
 	install -d -m 755 $(DESTDIR)$(rpmmacrosdir)
-	install -m 644 $(MACROS_FILES) $(DESTDIR)/$(rpmmacrosdir)
+	install -m 644 $(MACROS_FILES) $(DESTDIR)/$(rpmmacrosdir)/macros.rpm-helper
 	install -d -m 755 $(DESTDIR)$(sysconfigdir)
 	install -m 644 $(CONF_FILES) $(DESTDIR)/$(sysconfigdir)
 	install -d -m 755 $(DESTDIR)$(systemdmigrationdir)
